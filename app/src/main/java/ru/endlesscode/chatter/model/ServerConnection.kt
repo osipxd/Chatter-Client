@@ -29,8 +29,9 @@ interface ServerConnection {
 
     val serverAddress: String
     val serverPort: Int
-    val messageHandler: Handler
+    val handleMessage: (String) -> Unit
 
     fun start()
-    fun stop()
+    suspend fun stop()
+    fun log(message: String)
 }

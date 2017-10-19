@@ -68,13 +68,11 @@ ext {
     moxyVersion = '1.5.+'
     daggerVersion = '2.12'
 
-    // Network
-    socketsVersion = '0.0.4'
-
     // Async
     coroutinesVersion = '0.19'
 
     // Testing
+    spekVersion = '1.1.5'
     junitVersion = '4.12'
 }
 
@@ -92,14 +90,14 @@ dependencies {
     compile "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    // Network
-    compile "org.jetbrains.kotlinx:kotlin-sockets:$socketsVersion"
-
     // Async
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
 
     // Testing
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    testCompile "org.jetbrains.spek:spek-api:$spekVersion"
+    testCompile "org.jetbrains.spek:spek-junit-platform-engine:$spekVersion"
+    testCompile "org.junit.platform:junit-platform-runner:1.0.0"
     testCompile "junit:junit:$junitVersion"
 }
 

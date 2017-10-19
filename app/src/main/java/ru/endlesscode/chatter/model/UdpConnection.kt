@@ -25,71 +25,130 @@
 
 package ru.endlesscode.chatter.model
 
-import kotlinx.coroutines.experimental.channels.ActorJob
-import kotlinx.coroutines.experimental.channels.ArrayChannel
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ProducerJob
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
-import kotlinx.sockets.aSocket
-import kotlinx.sockets.adapters.openTextReceiveChannel
-import kotlinx.sockets.adapters.openTextSendChannel
 import java.lang.Thread.sleep
+import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.nio.channels.DatagramChannel
+import java.nio.channels.NotYetConnectedException
 
 class UdpConnection(
         override val serverAddress: String,
         override val serverPort: Int,
-        override val messageHandler: Handler
+        override val handleMessage: (String) -> Unit = { }
 ) : ServerConnection {
 
     private val remoteAddress: InetSocketAddress
         get() = InetSocketAddress(InetAddress.getByName(serverAddress), serverPort)
-    private val pool = runUnlimitedPool()
+
+    private val channel = DatagramChannel.open()
+    private var sendJob: Job? = null
+    private var receiveJob: Job? = null
+
+    companion object {
+        private const val TIMEOUT = 2 * 1000
+    }
 
     override fun start() {
+        if (channel.isConnected) return
+
         launch {
-            aSocket().udp().connect(remoteAddress).use { socket ->
-                val sendChannel = socket.openTextSendChannel(Charsets.UTF_8, pool)
-                val receiveChannel = socket.openTextReceiveChannel(Charsets.UTF_8, pool)
+            try {
+                channel.connect(remoteAddress)
+                channel.socket().soTimeout = TIMEOUT
+                log("Connected to: $remoteAddress")
 
-                val sendJob = sendMessages(sendChannel)
-                val listenJob = listenChannel(receiveChannel)
-
-                sendJob.join()
-                listenJob.join()
+                startListenChannel()
+            } catch (e: Exception) {
+                stop()
             }
         }
     }
 
-    private fun listenChannel(receiveChannel: ProducerJob<String>) = launch {
-        while (true) {
-            val message = receiveChannel.receive()
-            println(message)
-        }
-    }
+    private fun startListenChannel() {
+        receiveJob = launch {
+            log("Starting messages listener...")
+            while (!channel.isConnected) {
+                log("Connection lost, retrying in 2 seconds.")
+                sleep(TIMEOUT.toLong())
+                if (sendJob!!.isCancelled) {
+                    log("Listening was cancelled.")
+                    return@launch
+                }
+            }
 
-    private fun sendMessages(sendChannel: ActorJob<CharSequence>) = launch {
-        while (true) {
-            sleep(3000)
-            sendChannel.send("Hello!")
-        }
-    }
-
-    override fun stop() {
-
-    }
-
-    private fun runUnlimitedPool(): Channel<ByteBuffer> {
-        val pool = ArrayChannel<ByteBuffer>(256)
-
-        launch {
+            log("Messages listener successfully started!")
+            val buffer = allocateBuffer()
             while (true) {
-                if (!pool.offer(ByteBuffer.allocate(8192))) break
+                buffer.clear()
+                val packet = DatagramPacket(buffer.array(), buffer.array().size)
+
+                try {
+                    channel.socket().receive(packet)
+                    val message = String(buffer.array().trim(), Charsets.UTF_8)
+                    log("Message received: $message")
+                    handleMessage(message)
+                } catch (e: Exception) {
+                    if (receiveJob!!.isCancelled) {
+                        log("Listening was cancelled.")
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    fun sendMessageAsync(message: String) {
+        sendJob = if (sendJob == null) {
+            launch { sendMessage(message) }
+        } else {
+            launch { }
+        }
+    }
+
+    private suspend fun sendMessage(message: String) {
+        log("Sending message: $message")
+        while (!channel.isConnected) {
+            log("Connection lost, retrying in 2 seconds.")
+            sleep(TIMEOUT.toLong())
+            if (sendJob!!.isCancelled) {
+                log("Sending was cancelled.")
             }
         }
 
-        return pool
+        val buffer = allocateBuffer()
+        buffer.put(message.toByteArray())
+        buffer.flip()
+
+        try {
+            channel.write(buffer)
+            log("Message successfully sent!")
+        } catch (e: NotYetConnectedException) {
+            println(e.printStackTrace())
+        }
     }
+
+    private fun allocateBuffer(): ByteBuffer = ByteBuffer.allocate(1024)
+
+    suspend override fun stop() {
+        log("Stopping channel listener...")
+        receiveJob?.cancel()
+        receiveJob?.join()
+        log("Channel listener stopped.")
+        log("Awaiting end of message sending...")
+        sendJob?.join()
+        log("All messages sent.")
+
+        channel.close()
+        log("Connection closed.")
+    }
+
+    override fun log(message: String) {
+        println(message)
+    }
+
+    fun ByteArray.trim(): ByteArray = this.filterNot { it == 0.toByte() }.toByteArray()
 }
