@@ -25,6 +25,7 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'idea'
 
 android {
@@ -47,10 +48,20 @@ android {
     }
 }
 
+kapt {
+    generateStubs = true
+}
+
 ext {
     supportVersion = '26.+'
+
+    // UI
     constraintLayoutVersion = '1.0.+'
 
+    // Arch
+    moxyVersion = '1.5.+'
+
+    // Testing
     junitVersion = '4.12'
 }
 
@@ -58,8 +69,15 @@ dependencies {
     compile "com.android.support:appcompat-v7:$supportVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
 
+    // UI
     compile "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
 
+    // Arch
+    compile "com.arello-mobile:moxy:$moxyVersion"
+    compile "com.arello-mobile:moxy-app-compat:$moxyVersion"
+    kapt "com.arello-mobile:moxy-compiler:$moxyVersion"
+
+    // Testing
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     testCompile "junit:junit:$junitVersion"
 }
