@@ -23,35 +23,16 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.ui.fragment
+package ru.endlesscode.chatter.di
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.arellomobile.mvp.MvpAppCompatFragment
-import com.arellomobile.mvp.presenter.InjectPresenter
-import com.arellomobile.mvp.presenter.ProvidePresenter
-import ru.endlesscode.chatter.App
-import ru.endlesscode.chatter.R
-import ru.endlesscode.chatter.presentation.presenter.ChatPresenter
-import ru.endlesscode.chatter.presentation.view.ChatView
-import javax.inject.Inject
+import dagger.Component
+import ru.endlesscode.chatter.di.module.AppModule
+import ru.endlesscode.chatter.ui.fragment.ChatFragment
+import javax.inject.Singleton
 
-class ChatFragment : MvpAppCompatFragment(), ChatView {
+@Singleton
+@Component(modules = arrayOf(AppModule::class))
+interface AppComponent {
 
-    @Inject
-    @InjectPresenter
-    lateinit var presenter: ChatPresenter
-
-    @ProvidePresenter
-    fun providePresenter(): ChatPresenter = presenter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        App.appComponent.inject(this)
-        super.onCreate(savedInstanceState)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.screen_chat, container, false)
+    fun inject(chatFragment: ChatFragment)
 }

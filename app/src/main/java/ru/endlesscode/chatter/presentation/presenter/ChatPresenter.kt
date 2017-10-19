@@ -28,6 +28,9 @@ package ru.endlesscode.chatter.presentation.presenter
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
 import ru.endlesscode.chatter.presentation.view.ChatView
+import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 @InjectViewState
-class ChatPresenter : MvpPresenter<ChatView>()
+class ChatPresenter @Inject constructor() : MvpPresenter<ChatView>()
