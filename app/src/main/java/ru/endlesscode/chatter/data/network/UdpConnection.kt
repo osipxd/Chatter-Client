@@ -26,9 +26,9 @@
 package ru.endlesscode.chatter.data.network
 
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import ru.endlesscode.chatter.extension.toPrintable
-import java.lang.Thread.sleep
 import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -63,42 +63,42 @@ class UdpConnection(
                 channel.socket().soTimeout = TIMEOUT
                 log("Connected to: $remoteAddress")
 
-                listenChannel()
+                startChannelListening()
             } catch (e: Exception) {
                 stop()
             }
         }
     }
 
-    private fun listenChannel() {
+    private fun startChannelListening() {
         receiveJob = launch {
             log("Starting messages listener...")
-            while (!channel.isConnected) {
-                log("Connection lost, retrying in 2 seconds.")
-                sleep(TIMEOUT.toLong())
-                if (receiveJob!!.isCancelled) {
-                    log("Listening was cancelled.")
-                    return@launch
-                }
+            if (!receiveJob!!.waitConnection()) {
+                return@launch
             }
 
             log("Messages listener successfully started!")
             val buffer = allocateBuffer()
             while (true) {
-                buffer.clear()
-                val packet = DatagramPacket(buffer.array(), buffer.array().size)
+                listenChannel(buffer)
+            }
+        }
+    }
 
-                try {
-                    channel.socket().receive(packet)
-                    val message = buffer.toPrintable()
-                    log("Message received: $message")
-                    handleMessage(message)
-                } catch (e: Exception) {
-                    if (receiveJob!!.isCancelled) {
-                        log("Listening was cancelled.")
-                        break
-                    }
-                }
+    private fun listenChannel(buffer: ByteBuffer) {
+        buffer.clear()
+        val packet = DatagramPacket(buffer.array(), buffer.array().size)
+
+        try {
+            channel.socket().receive(packet)
+            val message = buffer.toPrintable()
+            log("Message received: $message")
+            handleMessage(message)
+        } catch (e: Exception) {
+            val job = receiveJob
+            if (job!!.isCancelled) {
+                log("Listening was cancelled.")
+                throw job.getCancellationException()
             }
         }
     }
@@ -112,13 +112,8 @@ class UdpConnection(
 
     private suspend fun sendMessage(message: String) {
         log("Sending message: $message")
-        while (!channel.isConnected) {
-            log("Connection lost, retrying in 2 seconds.")
-            sleep(TIMEOUT.toLong())
-            if (sendJob!!.isCancelled) {
-                log("Sending was cancelled.")
-                return
-            }
+        if (!sendJob!!.waitConnection()) {
+            return
         }
 
         val buffer = allocateBuffer()
@@ -134,6 +129,19 @@ class UdpConnection(
     }
 
     private fun allocateBuffer(): ByteBuffer = ByteBuffer.allocate(1024)
+
+    private suspend fun Job.waitConnection(): Boolean {
+        while (!channel.isConnected) {
+            log("Connection lost, retrying in 2 seconds.")
+            delay(TIMEOUT.toLong())
+            if (this.isCancelled) {
+                log("Job was cancelled.")
+                return false
+            }
+        }
+
+        return true
+    }
 
     suspend override fun stop() {
         log("Stopping channel listener...")
