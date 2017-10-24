@@ -23,28 +23,10 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data
+package ru.endlesscode.chatter.extension
 
-import kotlinx.coroutines.experimental.runBlocking
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.context
-import ru.endlesscode.chatter.data.network.UdpConnection
-import java.lang.Thread.sleep
+import java.nio.ByteBuffer
 
-class UdpConnectionSpec : Spek({
+fun ByteBuffer.toPrintable(): String = String(this.array().trim())
 
-    context("send message") {
-        runBlocking {
-            val connection = UdpConnection("localhost", 4242)
-            connection.start()
-            connection.sendMessageAsync("Hello!")
-            sleep(2000)
-            connection.sendMessageAsync("How are you?")
-            sleep(2000)
-            connection.sendMessageAsync("Thanks, I'm too")
-            sleep(2000)
-            connection.sendMessageAsync("Goodbye!")
-            connection.stop()
-        }
-    }
-})
+fun ByteArray.trim(): ByteArray = this.filterNot { it == 0.toByte() }.toByteArray()

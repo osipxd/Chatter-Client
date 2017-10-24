@@ -23,10 +23,11 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data
+package ru.endlesscode.chatter.data.network
 
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
+import ru.endlesscode.chatter.extension.toPrintable
 import java.lang.Thread.sleep
 import java.net.DatagramPacket
 import java.net.InetAddress
@@ -49,6 +50,7 @@ class UdpConnection(
     private var receiveJob: Job? = null
 
     companion object {
+        private const val TAG = "UdpConnection"
         private const val TIMEOUT = 2 * 1000
     }
 
@@ -61,20 +63,20 @@ class UdpConnection(
                 channel.socket().soTimeout = TIMEOUT
                 log("Connected to: $remoteAddress")
 
-                startListenChannel()
+                listenChannel()
             } catch (e: Exception) {
                 stop()
             }
         }
     }
 
-    private fun startListenChannel() {
+    private fun listenChannel() {
         receiveJob = launch {
             log("Starting messages listener...")
             while (!channel.isConnected) {
                 log("Connection lost, retrying in 2 seconds.")
                 sleep(TIMEOUT.toLong())
-                if (sendJob!!.isCancelled) {
+                if (receiveJob!!.isCancelled) {
                     log("Listening was cancelled.")
                     return@launch
                 }
@@ -88,7 +90,7 @@ class UdpConnection(
 
                 try {
                     channel.socket().receive(packet)
-                    val message = String(buffer.array().trim(), Charsets.UTF_8)
+                    val message = buffer.toPrintable()
                     log("Message received: $message")
                     handleMessage(message)
                 } catch (e: Exception) {
@@ -101,12 +103,11 @@ class UdpConnection(
         }
     }
 
-    fun sendMessageAsync(message: String) {
-        sendJob = if (sendJob == null) {
-            launch { sendMessage(message) }
-        } else {
-            launch { }
-        }
+    fun sendMessageAsync(message: String): Job {
+        val job = launch { sendMessage(message) }
+        sendJob = job
+
+        return job
     }
 
     private suspend fun sendMessage(message: String) {
@@ -116,6 +117,7 @@ class UdpConnection(
             sleep(TIMEOUT.toLong())
             if (sendJob!!.isCancelled) {
                 log("Sending was cancelled.")
+                return
             }
         }
 
@@ -125,7 +127,7 @@ class UdpConnection(
 
         try {
             channel.write(buffer)
-            log("Message successfully sent!")
+            log("Message \"$message\" successfully sent!")
         } catch (e: NotYetConnectedException) {
             println(e.printStackTrace())
         }
@@ -137,8 +139,7 @@ class UdpConnection(
         log("Stopping channel listener...")
         receiveJob?.cancel()
         receiveJob?.join()
-        log("Channel listener stopped.")
-        log("Awaiting end of message sending...")
+        log("Channel listener stopped.\nAwaiting end of message sending...")
         sendJob?.join()
         log("All messages sent.")
 
@@ -146,9 +147,7 @@ class UdpConnection(
         log("Connection closed.")
     }
 
-    override fun log(message: String) {
-        println(message)
+    private fun log(message: String) {
+        println("[$TAG] $message")
     }
-
-    fun ByteArray.trim(): ByteArray = this.filterNot { it == 0.toByte() }.toByteArray()
 }

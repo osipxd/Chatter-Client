@@ -25,13 +25,7 @@
 
 package ru.endlesscode.chatter.data
 
-interface ServerConnection {
-
-    val serverAddress: String
-    val serverPort: Int
-    val handleMessage: (String) -> Unit
-
-    fun start()
-    suspend fun stop()
-    fun log(message: String)
+interface MessageRepository {
+    fun sendMessage(message: String)
+    fun setMessageListener(listener: (String) -> Unit)
 }
