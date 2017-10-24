@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.model
+package ru.endlesscode.chatter.data
 
 import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.Spek

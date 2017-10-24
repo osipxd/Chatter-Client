@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.model
+package ru.endlesscode.chatter.data
 
 interface ServerConnection {
 
