@@ -79,13 +79,13 @@ class UdpConnection(
 
             log("Messages listener successfully started!")
             val buffer = allocateBuffer()
-            while (true) {
-                listenChannel(buffer)
+            while (listenChannel(buffer)) {
+                // Listen channel while returns true
             }
         }
     }
 
-    private fun listenChannel(buffer: ByteBuffer) {
+    private fun listenChannel(buffer: ByteBuffer): Boolean {
         buffer.clear()
         val packet = DatagramPacket(buffer.array(), buffer.array().size)
 
@@ -98,9 +98,11 @@ class UdpConnection(
             val job = receiveJob
             if (job!!.isCancelled) {
                 log("Listening was cancelled.")
-                throw job.getCancellationException()
+                return false
             }
         }
+
+        return true
     }
 
     fun sendMessageAsync(message: String): Job {
