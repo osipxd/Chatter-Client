@@ -46,10 +46,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    testOptions.unitTests {
+        returnDefaultValues = true
+    }
 }
 
 kapt {
     generateStubs = true
+    correctErrorTypes = true
 }
 
 kotlin {
@@ -73,7 +78,8 @@ ext {
 
     // Testing
     spekVersion = '1.1.5'
-    junitVersion = '4.12'
+    mockitoVersion = '2.11.+'
+    mockitoKotlinVersion = '1.5.+'
 }
 
 dependencies {
@@ -94,11 +100,14 @@ dependencies {
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
 
     // Testing
+    testCompile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     testCompile "org.jetbrains.spek:spek-api:$spekVersion"
     testCompile "org.jetbrains.spek:spek-junit-platform-engine:$spekVersion"
     testCompile "org.junit.platform:junit-platform-runner:1.0.0"
-    testCompile "junit:junit:$junitVersion"
+    testCompile "org.mockito:mockito-core:$mockitoVersion"
+    testCompile "org.mockito:mockito-inline:$mockitoVersion"
+    testCompile "com.nhaarman:mockito-kotlin-kt1.1:$mockitoKotlinVersion"
 }
 
 repositories {

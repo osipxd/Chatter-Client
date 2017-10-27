@@ -25,6 +25,7 @@
 
 package ru.endlesscode.chatter.data.network
 
+import android.support.annotation.VisibleForTesting
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
@@ -34,18 +35,17 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
-import java.nio.channels.NotYetConnectedException
 
 class UdpConnection(
         override val serverAddress: String,
         override val serverPort: Int,
-        override val handleMessage: (String) -> Unit = { }
+        override val handleMessage: (String) -> Unit = { },
+        private val channel: DatagramChannel = DatagramChannel.open()
 ) : ServerConnection {
 
     private val remoteAddress: InetSocketAddress
         get() = InetSocketAddress(InetAddress.getByName(serverAddress), serverPort)
 
-    private val channel = DatagramChannel.open()
     private var sendJob: Job? = null
     private var receiveJob: Job? = null
 
@@ -112,9 +112,10 @@ class UdpConnection(
         return job
     }
 
-    private suspend fun sendMessage(message: String) {
+    @VisibleForTesting
+    internal suspend fun sendMessage(message: String) {
         log("Sending message: $message")
-        if (!sendJob!!.waitConnection()) {
+        if (sendJob?.waitConnection() == false) {
             return
         }
 
@@ -125,7 +126,7 @@ class UdpConnection(
         try {
             channel.write(buffer)
             log("Message \"$message\" successfully sent!")
-        } catch (e: NotYetConnectedException) {
+        } catch (e: Exception) {
             println(e.printStackTrace())
         }
     }
@@ -149,7 +150,8 @@ class UdpConnection(
         log("Stopping channel listener...")
         receiveJob?.cancel()
         receiveJob?.join()
-        log("Channel listener stopped.\nAwaiting end of message sending...")
+        log("Channel listener stopped.")
+        log("Awaiting end of message sending...")
         sendJob?.join()
         log("All messages sent.")
 

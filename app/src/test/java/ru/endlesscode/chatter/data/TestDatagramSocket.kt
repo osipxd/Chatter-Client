@@ -25,40 +25,38 @@
 
 package ru.endlesscode.chatter.data
 
-import com.nhaarman.mockito_kotlin.spy
-import com.nhaarman.mockito_kotlin.verify
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.context
-import org.jetbrains.spek.api.dsl.it
-import org.junit.platform.runner.JUnitPlatform
-import org.junit.runner.RunWith
-import ru.endlesscode.chatter.data.network.UdpConnection
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.SocketTimeoutException
 
+class TestDatagramSocket : DatagramSocket() {
 
-@RunWith(JUnitPlatform::class)
-class UdpConnectionSpec : Spek({
-    val socket = spy(TestDatagramSocket())
-    val channel = spy(TestDatagramChannel(socket))
-    val connection = UdpConnection("localhost", 4242, channel = channel)
+    var responseTime: Long = 500
+    var delataTime: Long = 100
 
-    context("sending message") {
-        beforeEachTest {
-            connection.start()
-        }
+    private var currentWaitTime: Long = 0
 
-        it("should successfully send message") {
-            val message = "Test message"
-            runBlocking {
-                connection.sendMessage(message)
-            }
-            verify(channel).messageSent(message)
-        }
+    fun getMessage(): String? {
+        return null
+    }
 
-        afterEachTest {
-            runBlocking {
-                connection.stop()
+    override fun receive(packet: DatagramPacket) {
+        currentWaitTime = 0
+        runBlocking {
+            val message = getMessage()
+            while (true) {
+                delay(delataTime)
+                currentWaitTime += delataTime
+
+                if (currentWaitTime >= responseTime && message != null) {
+                    packet.data = message.toByteArray()
+                    break
+                }
+
+                if (currentWaitTime >= soTimeout) throw SocketTimeoutException()
             }
         }
     }
-})
+}
