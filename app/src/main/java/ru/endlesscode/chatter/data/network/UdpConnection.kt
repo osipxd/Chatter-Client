@@ -73,7 +73,7 @@ class UdpConnection(
     private fun startChannelListening() {
         receiveJob = launch {
             log("Starting messages listener...")
-            if (!receiveJob!!.waitConnection()) {
+            if (receiveJob?.waitConnection() == false) {
                 return@launch
             }
 

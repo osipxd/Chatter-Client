@@ -25,13 +25,15 @@
 
 package ru.endlesscode.chatter.data.network
 
+import com.nhaarman.mockito_kotlin.doReturn
+import com.nhaarman.mockito_kotlin.whenever
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.SocketTimeoutException
 
-class TestDatagramSocket : DatagramSocket() {
+class DummyDatagramSocket : DatagramSocket() {
 
     var responseTime: Long = 500
     var deltaTime: Long = 100
@@ -64,5 +66,9 @@ class TestDatagramSocket : DatagramSocket() {
                 if (currentWaitTime >= soTimeout) throw SocketTimeoutException()
             }
         }
+    }
+
+    fun sendMessageFromServer(message: String) {
+        whenever(this.getMessage()).doReturn(message).thenReturn(null)
     }
 }

@@ -23,63 +23,72 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.data
 
 import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.spy
+import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
+import ru.endlesscode.chatter.data.network.DummyDatagramChannel
+import ru.endlesscode.chatter.data.network.DummyDatagramSocket
+import ru.endlesscode.chatter.data.network.UdpConnection
 import kotlin.test.assertEquals
 
 
 @RunWith(JUnitPlatform::class)
-class UdpConnectionSpec : Spek({
+class UdpMessagesRepositorySpec : Spek({
     val socket = spy(DummyDatagramSocket())
     val channel = spy(DummyDatagramChannel(socket))
-    val connection = UdpConnection(
+    val connection = spy(UdpConnection(
             serverAddress = "localhost",
             serverPort = 4242,
             channel = channel
-    )
+    ))
+    val repository = UdpMessagesRepository(connection)
 
-    context("sending message") {
-        beforeGroup {
-            connection.start()
+    beforeEachTest {
+        clearInvocations(connection)
+    }
+
+    on("sending message") {
+        it("should send if queue is empty") {
+            val message = "empty queue"
+            repository.sendMessage(message)
+            verify(connection).sendMessageAsync(message)
         }
 
-        beforeEachTest {
-            clearInvocations(socket)
-            clearInvocations(channel)
+        it("should send after sending all messages in queue") {
+            val message = "other message"
+            repository.sendMessage(message)
+            verify(connection, times(0)).sendMessageAsync(message)
+            runBlocking { delay(channel.sendTime) }
+
+            verify(connection).sendMessageAsync(message)
         }
+    }
 
-        it("should successfully send message") {
-            val message = "Test message"
-            runBlocking {
-                connection.sendMessage(message)
-            }
-            verify(channel).messageSent(message)
-        }
+    on("receiving message") {
+        var receivedMessage = ""
+        repository.setMessageListener { receivedMessage = it }
 
-        it("should successfully receive message") {
-            val message = "Test message"
-            var receivedMessage = ""
-            connection.handleMessage = { receivedMessage = it }
-
+        it("should receive message") {
+            val message = "message from server"
             socket.sendMessageFromServer(message)
-            runBlocking { delay((socket.responseTime * 1.5).toLong()) }
+            runBlocking { delay(socket.responseTime) }
             assertEquals(message, receivedMessage)
         }
+    }
 
-        afterGroup {
-            runBlocking {
-                connection.stop()
-            }
+    afterGroup {
+        runBlocking {
+            repository.finish()
         }
     }
 })
