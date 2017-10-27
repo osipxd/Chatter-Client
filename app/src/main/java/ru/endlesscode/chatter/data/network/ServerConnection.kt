@@ -25,6 +25,8 @@
 
 package ru.endlesscode.chatter.data.network
 
+import kotlinx.coroutines.experimental.Job
+
 interface ServerConnection {
 
     val serverAddress: String
@@ -32,5 +34,6 @@ interface ServerConnection {
     var handleMessage: (String) -> Unit
 
     fun start()
+    fun sendMessageAsync(message: String): Job
     suspend fun stop()
 }

@@ -25,11 +25,11 @@
 
 package ru.endlesscode.chatter.data
 
-import ru.endlesscode.chatter.data.network.UdpConnection
+import ru.endlesscode.chatter.data.network.ServerConnection
 
 
-class UdpMessagesRepository(
-        private val connection: UdpConnection
+class NetworkMessagesRepository(
+        private val connection: ServerConnection
 ) : MessagesRepository {
 
     private val messagesQueue = mutableListOf<String>()

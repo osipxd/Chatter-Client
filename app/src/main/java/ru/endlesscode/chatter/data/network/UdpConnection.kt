@@ -105,7 +105,7 @@ class UdpConnection(
         return true
     }
 
-    fun sendMessageAsync(message: String): Job {
+    override fun sendMessageAsync(message: String): Job {
         val job = launch { sendMessage(message) }
         sendJob = job
 

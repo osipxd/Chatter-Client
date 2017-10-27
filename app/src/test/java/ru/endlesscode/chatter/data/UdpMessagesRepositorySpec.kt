@@ -51,7 +51,7 @@ class UdpMessagesRepositorySpec : Spek({
             serverPort = 4242,
             channel = channel
     ))
-    val repository = UdpMessagesRepository(connection)
+    val repository = NetworkMessagesRepository(connection)
 
     beforeEachTest {
         clearInvocations(connection)
