@@ -23,17 +23,29 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.presentation.presenter
+package ru.endlesscode.chatter.di.module
 
-import com.arellomobile.mvp.InjectViewState
-import com.arellomobile.mvp.MvpPresenter
+import android.content.Context
+import dagger.Module
+import dagger.Provides
+import ru.endlesscode.chatter.data.messages.MessagesRepository
+import ru.endlesscode.chatter.data.messages.NetworkMessagesRepository
+import ru.endlesscode.chatter.data.network.ServerConnection
 import ru.endlesscode.chatter.model.messages.MessagesInteractor
-import ru.endlesscode.chatter.presentation.view.ChatView
-import javax.inject.Inject
+import ru.endlesscode.chatter.model.messages.MessagesInteractorImpl
 import javax.inject.Singleton
 
-@Singleton
-@InjectViewState
-class ChatPresenter @Inject constructor(
-        private val interactor: MessagesInteractor
-) : MvpPresenter<ChatView>()
+
+@Module
+class MessagesModule {
+
+    @Provides
+    @Singleton
+    fun provideMessagesInteractor(context: Context, repository: MessagesRepository): MessagesInteractor =
+            MessagesInteractorImpl(context, repository)
+
+    @Provides
+    @Singleton
+    fun provideMessagesRepository(connection: ServerConnection): MessagesRepository =
+            NetworkMessagesRepository(connection)
+}

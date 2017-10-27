@@ -27,11 +27,17 @@ package ru.endlesscode.chatter.di
 
 import dagger.Component
 import ru.endlesscode.chatter.di.module.AppModule
+import ru.endlesscode.chatter.di.module.MessagesModule
+import ru.endlesscode.chatter.di.module.NetworkModule
 import ru.endlesscode.chatter.ui.fragment.ChatFragment
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = arrayOf(AppModule::class))
+@Component(modules = arrayOf(
+        AppModule::class,
+        NetworkModule::class,
+        MessagesModule::class
+))
 interface AppComponent {
 
     fun inject(chatFragment: ChatFragment)

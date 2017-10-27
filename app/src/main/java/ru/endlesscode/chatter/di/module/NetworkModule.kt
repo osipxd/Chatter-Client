@@ -23,17 +23,27 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.presentation.presenter
+package ru.endlesscode.chatter.di.module
 
-import com.arellomobile.mvp.InjectViewState
-import com.arellomobile.mvp.MvpPresenter
-import ru.endlesscode.chatter.model.messages.MessagesInteractor
-import ru.endlesscode.chatter.presentation.view.ChatView
-import javax.inject.Inject
+import dagger.Module
+import dagger.Provides
+import ru.endlesscode.chatter.data.network.ServerConnection
+import ru.endlesscode.chatter.data.network.UdpConnection
 import javax.inject.Singleton
 
-@Singleton
-@InjectViewState
-class ChatPresenter @Inject constructor(
-        private val interactor: MessagesInteractor
-) : MvpPresenter<ChatView>()
+
+@Module
+class NetworkModule {
+
+    @Provides
+    @Singleton
+    fun provideServerConnection(address: String, port: Int): ServerConnection = UdpConnection(address, port)
+
+    @Provides
+    @Singleton
+    fun provideAddress(): String = "localhost" // TODO: Real address
+
+    @Provides
+    @Singleton
+    fun providePort(): Int = 4242 // TODO: Real port
+}
