@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data
+package ru.endlesscode.chatter.data.network
 
 import com.nhaarman.mockito_kotlin.mock
 import ru.endlesscode.chatter.extension.toPrintable

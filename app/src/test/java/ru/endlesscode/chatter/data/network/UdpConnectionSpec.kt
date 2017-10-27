@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data
+package ru.endlesscode.chatter.data.network
 
 import com.nhaarman.mockito_kotlin.*
 import kotlinx.coroutines.experimental.delay
@@ -33,7 +33,6 @@ import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
-import ru.endlesscode.chatter.data.network.UdpConnection
 import kotlin.test.assertEquals
 
 
@@ -41,11 +40,9 @@ import kotlin.test.assertEquals
 class UdpConnectionSpec : Spek({
     val socket = spy(TestDatagramSocket())
     val channel = spy(TestDatagramChannel(socket))
-    var receivedMessage: String = ""
     val connection = UdpConnection(
             serverAddress = "localhost",
             serverPort = 4242,
-            handleMessage = { receivedMessage = it },
             channel = channel
     )
 
@@ -55,7 +52,6 @@ class UdpConnectionSpec : Spek({
         }
 
         beforeEachTest {
-            receivedMessage = ""
             clearInvocations(socket)
             clearInvocations(channel)
         }
@@ -70,6 +66,9 @@ class UdpConnectionSpec : Spek({
 
         it("should successfully receive message") {
             val message = "Test message"
+            var receivedMessage = ""
+            connection.handleMessage = { receivedMessage = it }
+
             whenever(socket.getMessage()).doReturn(message).thenReturn(null)
             runBlocking { delay(1000) }
             assertEquals(receivedMessage, message)
