@@ -34,7 +34,7 @@ import java.net.SocketTimeoutException
 class TestDatagramSocket : DatagramSocket() {
 
     var responseTime: Long = 500
-    var delataTime: Long = 100
+    var deltaTime: Long = 100
 
     private var currentWaitTime: Long = 0
 
@@ -47,8 +47,8 @@ class TestDatagramSocket : DatagramSocket() {
         runBlocking {
             var message = getMessage()
             while (true) {
-                delay(delataTime)
-                currentWaitTime += delataTime
+                delay(deltaTime)
+                currentWaitTime += deltaTime
 
                 if (message == null) {
                     message = getMessage()
