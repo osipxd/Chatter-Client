@@ -23,14 +23,9 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.data
 
-interface ServerConnection {
-
-    val serverAddress: String
-    val serverPort: Int
-    var handleMessage: (String) -> Unit
-
-    fun start()
-    suspend fun stop()
+interface MessagesRepository {
+    fun sendMessage(message: String)
+    fun setMessageListener(listener: (String) -> Unit)
 }

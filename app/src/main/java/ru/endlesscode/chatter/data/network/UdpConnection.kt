@@ -39,7 +39,7 @@ import java.nio.channels.DatagramChannel
 class UdpConnection(
         override val serverAddress: String,
         override val serverPort: Int,
-        override val handleMessage: (String) -> Unit = { },
+        override var handleMessage: (String) -> Unit = { },
         private val channel: DatagramChannel = DatagramChannel.open()
 ) : ServerConnection {
 

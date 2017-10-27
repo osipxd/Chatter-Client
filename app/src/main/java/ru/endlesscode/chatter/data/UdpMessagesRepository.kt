@@ -25,7 +25,28 @@
 
 package ru.endlesscode.chatter.data
 
-interface MessageRepository {
-    fun sendMessage(message: String)
-    fun setMessageListener(listener: (String) -> Unit)
+import ru.endlesscode.chatter.data.network.UdpConnection
+
+class UdpMessagesRepository(
+        private val connection: UdpConnection
+) : MessagesRepository {
+
+    private var listener: (String) -> Unit = { }
+
+    init {
+        connection.start()
+        connection.handleMessage = this::handleMessage
+    }
+
+    override fun sendMessage(message: String) {
+        connection.sendMessageAsync(message)
+    }
+
+    override fun setMessageListener(listener: (String) -> Unit) {
+        this.listener = listener
+    }
+
+    private fun handleMessage(message: String) {
+        listener(message)
+    }
 }
