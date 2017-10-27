@@ -91,9 +91,9 @@ class UdpConnection(
 
         try {
             channel.socket().receive(packet)
-            val message = buffer.toPrintable()
-            log("Message received: $message")
+            val message = packet.data.toPrintable()
             handleMessage(message)
+            log("Message received: $message")
         } catch (e: Exception) {
             val job = receiveJob
             if (job!!.isCancelled) {

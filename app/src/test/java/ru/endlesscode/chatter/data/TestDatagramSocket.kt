@@ -45,13 +45,19 @@ class TestDatagramSocket : DatagramSocket() {
     override fun receive(packet: DatagramPacket) {
         currentWaitTime = 0
         runBlocking {
-            val message = getMessage()
+            var message = getMessage()
             while (true) {
                 delay(delataTime)
                 currentWaitTime += delataTime
 
+                if (message == null) {
+                    message = getMessage()
+                }
+
                 if (currentWaitTime >= responseTime && message != null) {
-                    packet.data = message.toByteArray()
+                    val data = message.toByteArray()
+                    val currData = packet.data
+                    data.forEachIndexed { index, byte -> currData[index] = byte }
                     break
                 }
 

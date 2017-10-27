@@ -27,6 +27,8 @@ package ru.endlesscode.chatter.extension
 
 import java.nio.ByteBuffer
 
-fun ByteBuffer.toPrintable(): String = String(this.array().trim())
+fun ByteBuffer.toPrintable(): String = this.array().toPrintable()
+
+fun ByteArray.toPrintable(): String = String(this.trim())
 
 fun ByteArray.trim(): ByteArray = this.filterNot { it == 0.toByte() }.toByteArray()
