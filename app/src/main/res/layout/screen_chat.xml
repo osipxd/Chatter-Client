@@ -34,15 +34,11 @@
         android:background="#13000000"
         tools:context=".ui.fragment.ChatFragment">
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
             android:id="@+id/messagesContainer"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="@dimen/space_default"
-            android:stackFromBottom="true"
-            android:transcriptMode="alwaysScroll"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="@dimen/space_small"
+            android:layout_marginBottom="@dimen/space_small"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/messageEdit"

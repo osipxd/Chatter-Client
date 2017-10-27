@@ -23,26 +23,23 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.presentation.view
+package ru.endlesscode.chatter.ui.adapter
 
-import com.arellomobile.mvp.MvpView
-import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy
-import com.arellomobile.mvp.viewstate.strategy.SkipStrategy
-import com.arellomobile.mvp.viewstate.strategy.StateStrategyType
+import android.support.v7.widget.RecyclerView
+import android.view.ViewGroup
+import kotlinx.android.synthetic.main.item_message.view.*
+import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.extension.inflate
 
-interface ChatView : MvpView {
-    @StateStrategyType(SkipStrategy::class)
-    fun showError(errorMessage: String)
+class MessageViewHolder(
+        group: ViewGroup
+) : RecyclerView.ViewHolder(group.inflate(R.layout.item_message)) {
 
-    @StateStrategyType(SkipStrategy::class)
-    fun showNewMessage(position: Int)
+    private val author = itemView.author
+    private val message = itemView.message
 
-    @StateStrategyType(AddToEndSingleStrategy::class)
-    fun initMessages(messages: List<String>)
-
-    @StateStrategyType(SkipStrategy::class)
-    fun clearInput()
-
-    @StateStrategyType(AddToEndSingleStrategy::class)
-    fun scrollTo(position: Int)
+    fun init(messageText: String) {
+        author.text = "John Doe"
+        message.text = messageText
+    }
 }

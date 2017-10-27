@@ -26,21 +26,22 @@
 package ru.endlesscode.chatter.ui.fragment
 
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
 import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
-import kotlinx.android.synthetic.main.item_message.view.*
+import dagger.Lazy
 import kotlinx.android.synthetic.main.screen_chat.*
 import ru.endlesscode.chatter.App
 import ru.endlesscode.chatter.R
-import ru.endlesscode.chatter.extension.inflate
 import ru.endlesscode.chatter.presentation.presenter.ChatPresenter
 import ru.endlesscode.chatter.presentation.view.ChatView
+import ru.endlesscode.chatter.ui.adapter.ChatAdapter
 import javax.inject.Inject
 
 class ChatFragment : MvpAppCompatFragment(), ChatView {
@@ -49,7 +50,10 @@ class ChatFragment : MvpAppCompatFragment(), ChatView {
     @InjectPresenter
     lateinit var presenter: ChatPresenter
 
-    private lateinit var messagesContainer: ListView
+    @Inject
+    lateinit var adapter: Lazy<ChatAdapter>
+
+    private lateinit var messagesContainer: RecyclerView
     private val message by lazy { messageEdit }
 
     @ProvidePresenter
@@ -63,6 +67,17 @@ class ChatFragment : MvpAppCompatFragment(), ChatView {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.screen_chat, container, false)
         this.messagesContainer = view.findViewById(R.id.messagesContainer)
+        messagesContainer.apply {
+            setHasFixedSize(true)
+
+            val layoutManager = LinearLayoutManager(context)
+            layoutManager.stackFromEnd = true
+            this.layoutManager = layoutManager
+
+            if (adapter == null) {
+                adapter = this@ChatFragment.adapter.get()
+            }
+        }
 
         return view
     }
@@ -81,11 +96,22 @@ class ChatFragment : MvpAppCompatFragment(), ChatView {
         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
     }
 
-    override fun addMessage(message: String) {
-        val messageItem: View = messagesContainer.inflate(R.layout.item_message)
-        messageItem.nickname.text = "John Doe"
-        messageItem.message.text = message
+    override fun initMessages(messages: List<String>) {
+        adapter.get().apply {
+            initItems(messages)
+            notifyDataSetChanged()
+        }
+    }
 
-        messagesContainer.addView(messageItem)
+    override fun clearInput() {
+        message.setText("")
+    }
+
+    override fun showNewMessage(position: Int) {
+        adapter.get().notifyItemInserted(position)
+    }
+
+    override fun scrollTo(position: Int) {
+        messagesContainer.scrollToPosition(position)
     }
 }

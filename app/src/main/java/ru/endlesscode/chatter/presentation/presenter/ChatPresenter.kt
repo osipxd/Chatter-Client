@@ -38,12 +38,22 @@ class ChatPresenter @Inject constructor(
         private val interactor: MessagesInteractor
 ) : MvpPresenter<ChatView>() {
 
+    private val messages = mutableListOf<String>()
+
     init {
         interactor.setMessageListener(this::onMessageReceived)
     }
 
+    override fun attachView(view: ChatView?) {
+        super.attachView(view)
+
+        viewState.initMessages(messages)
+    }
+
     fun onSendPressed(text: String) {
-        viewState.addMessage(text)
+        messages.add(text)
+        viewState.clearInput()
+        showLastMessage()
         interactor.sendMessage(text, this::onError)
     }
 
@@ -52,6 +62,13 @@ class ChatPresenter @Inject constructor(
     }
 
     private fun onMessageReceived(message: String) {
-        viewState.addMessage(message)
+        messages.add(message)
+        showLastMessage()
+    }
+
+    private fun showLastMessage() {
+        val index = messages.lastIndex
+        viewState.showNewMessage(index)
+        viewState.scrollTo(index)
     }
 }

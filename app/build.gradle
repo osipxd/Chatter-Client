@@ -88,6 +88,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
 
     // UI
+    compile "com.android.support:design:$supportVersion"
     compile "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
 
     // Arch

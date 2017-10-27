@@ -23,26 +23,9 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.presentation.view
+package ru.endlesscode.chatter.ui.adapter
 
-import com.arellomobile.mvp.MvpView
-import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy
-import com.arellomobile.mvp.viewstate.strategy.SkipStrategy
-import com.arellomobile.mvp.viewstate.strategy.StateStrategyType
-
-interface ChatView : MvpView {
-    @StateStrategyType(SkipStrategy::class)
-    fun showError(errorMessage: String)
-
-    @StateStrategyType(SkipStrategy::class)
-    fun showNewMessage(position: Int)
-
-    @StateStrategyType(AddToEndSingleStrategy::class)
-    fun initMessages(messages: List<String>)
-
-    @StateStrategyType(SkipStrategy::class)
-    fun clearInput()
-
-    @StateStrategyType(AddToEndSingleStrategy::class)
-    fun scrollTo(position: Int)
+object ListItemTypes {
+    const val LOADER = 0
+    const val MESSAGE = 1
 }
