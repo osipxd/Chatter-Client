@@ -114,7 +114,6 @@ class UdpConnection(
 
     @VisibleForTesting
     internal suspend fun sendMessage(message: String) {
-        log("Sending message: $message")
         if (sendJob?.waitConnection() == false) {
             return
         }
@@ -125,7 +124,7 @@ class UdpConnection(
 
         try {
             channel.write(buffer)
-            log("Message \"$message\" successfully sent!")
+            log("Message sent: $message")
         } catch (e: Exception) {
             println(e.printStackTrace())
         }
@@ -135,7 +134,6 @@ class UdpConnection(
 
     private suspend fun Job.waitConnection(): Boolean {
         while (!channel.isConnected) {
-            log("Connection lost, retrying in 2 seconds.")
             delay(TIMEOUT.toLong())
             if (this.isCancelled) {
                 log("Job was cancelled.")
