@@ -27,4 +27,7 @@ package ru.endlesscode.chatter.presentation.view
 
 import com.arellomobile.mvp.MvpView
 
-interface ChatView : MvpView
+interface ChatView : MvpView {
+    fun addMessage(message: String)
+    fun showError(errorMessage: String)
+}

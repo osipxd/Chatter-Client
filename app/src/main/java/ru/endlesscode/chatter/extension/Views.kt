@@ -23,35 +23,13 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.presentation.presenter
+package ru.endlesscode.chatter.extension
 
-import com.arellomobile.mvp.InjectViewState
-import com.arellomobile.mvp.MvpPresenter
-import ru.endlesscode.chatter.model.messages.MessagesInteractor
-import ru.endlesscode.chatter.presentation.view.ChatView
-import javax.inject.Inject
-import javax.inject.Singleton
+import android.support.annotation.LayoutRes
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 
-@Singleton
-@InjectViewState
-class ChatPresenter @Inject constructor(
-        private val interactor: MessagesInteractor
-) : MvpPresenter<ChatView>() {
-
-    init {
-        interactor.setMessageListener(this::onMessageReceived)
-    }
-
-    fun onSendPressed(text: String) {
-        viewState.addMessage(text)
-        interactor.sendMessage(text, this::onError)
-    }
-
-    private fun onError(errorMessage: String) {
-        viewState.showError(errorMessage)
-    }
-
-    private fun onMessageReceived(message: String) {
-        viewState.addMessage(message)
-    }
-}
+@Suppress("UNCHECKED_CAST")
+fun <T : View> ViewGroup.inflate(@LayoutRes layoutId: Int, attachToRoot: Boolean = false): T
+        = LayoutInflater.from(this.context).inflate(layoutId, this, attachToRoot) as T

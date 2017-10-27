@@ -29,11 +29,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
+import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
+import kotlinx.android.synthetic.main.item_message.view.*
+import kotlinx.android.synthetic.main.screen_chat.*
 import ru.endlesscode.chatter.App
 import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.extension.inflate
 import ru.endlesscode.chatter.presentation.presenter.ChatPresenter
 import ru.endlesscode.chatter.presentation.view.ChatView
 import javax.inject.Inject
@@ -44,6 +49,9 @@ class ChatFragment : MvpAppCompatFragment(), ChatView {
     @InjectPresenter
     lateinit var presenter: ChatPresenter
 
+    private lateinit var messagesContainer: ListView
+    private val message by lazy { messageEdit }
+
     @ProvidePresenter
     fun providePresenter(): ChatPresenter = presenter
 
@@ -52,6 +60,32 @@ class ChatFragment : MvpAppCompatFragment(), ChatView {
         super.onCreate(savedInstanceState)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.screen_chat, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view = inflater.inflate(R.layout.screen_chat, container, false)
+        this.messagesContainer = view.findViewById(R.id.messagesContainer)
+
+        return view
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        registerListeners()
+    }
+
+    private fun registerListeners() {
+        sendButton.setOnClickListener { presenter.onSendPressed(message.text.toString()) }
+    }
+
+    override fun showError(errorMessage: String) {
+        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun addMessage(message: String) {
+        val messageItem: View = messagesContainer.inflate(R.layout.item_message)
+        messageItem.nickname.text = "John Doe"
+        messageItem.message.text = message
+
+        messagesContainer.addView(messageItem)
+    }
 }
