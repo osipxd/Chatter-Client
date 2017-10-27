@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data
+package ru.endlesscode.chatter.model.messages
 
-interface MessagesRepository {
-    fun sendMessage(message: String)
+interface MessagesInteractor {
+    fun sendMessage(message: String, onError: (String) -> Unit)
     fun setMessageListener(listener: (String) -> Unit)
-    suspend fun finish()
+    fun finish(onFinished: () -> Unit)
 }

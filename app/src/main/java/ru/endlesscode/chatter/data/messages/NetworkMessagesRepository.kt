@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data
+package ru.endlesscode.chatter.data.messages
 
 import ru.endlesscode.chatter.data.network.ServerConnection
 

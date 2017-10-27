@@ -36,6 +36,7 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
+import ru.endlesscode.chatter.data.messages.NetworkMessagesRepository
 import ru.endlesscode.chatter.data.network.DummyDatagramChannel
 import ru.endlesscode.chatter.data.network.DummyDatagramSocket
 import ru.endlesscode.chatter.data.network.UdpConnection
