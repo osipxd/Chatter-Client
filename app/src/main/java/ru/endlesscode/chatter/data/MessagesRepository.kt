@@ -28,4 +28,5 @@ package ru.endlesscode.chatter.data
 interface MessagesRepository {
     fun sendMessage(message: String)
     fun setMessageListener(listener: (String) -> Unit)
+    suspend fun finish()
 }

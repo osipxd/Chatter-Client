@@ -27,9 +27,14 @@ package ru.endlesscode.chatter.data
 
 import ru.endlesscode.chatter.data.network.UdpConnection
 
+
 class UdpMessagesRepository(
         private val connection: UdpConnection
 ) : MessagesRepository {
+
+    private val messagesQueue = mutableListOf<String>()
+    private val isQueueFree: Boolean
+        get() = messagesQueue.isEmpty()
 
     private var listener: (String) -> Unit = { }
 
@@ -39,7 +44,23 @@ class UdpMessagesRepository(
     }
 
     override fun sendMessage(message: String) {
+        if (isQueueFree) {
+            messagesQueue.add(message)
+            sendNextMessage()
+        } else {
+            messagesQueue.add(message)
+        }
+    }
+
+    private fun sendNextMessage() {
+        val message = this.messagesQueue.first()
         connection.sendMessageAsync(message)
+                .invokeOnCompletion { onMessageSent() }
+    }
+
+    private fun onMessageSent() {
+        messagesQueue.removeAt(0)
+        if (!isQueueFree) sendNextMessage()
     }
 
     override fun setMessageListener(listener: (String) -> Unit) {
@@ -48,5 +69,9 @@ class UdpMessagesRepository(
 
     private fun handleMessage(message: String) {
         listener(message)
+    }
+
+    override suspend fun finish() {
+        connection.stop()
     }
 }
