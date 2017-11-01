@@ -28,7 +28,8 @@ package ru.endlesscode.chatter.data.network
 import com.nhaarman.mockito_kotlin.mock
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
-import ru.endlesscode.chatter.extension.toDataContainer
+import ru.endlesscode.chatter.data.json.bytesToData
+import ru.endlesscode.chatter.di.DI
 import java.net.*
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
@@ -43,7 +44,7 @@ class DummyDatagramChannel(private val socket: DummyDatagramSocket) : DatagramCh
 
     override fun write(buffer: ByteBuffer): Int {
         runBlocking { delay(sendTime) }
-        dataSent(buffer.toDataContainer())
+        dataSent(DI.converter.bytesToData(buffer.array()))
         return 0
     }
 

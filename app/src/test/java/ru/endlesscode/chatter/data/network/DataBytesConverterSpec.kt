@@ -25,16 +25,31 @@
 
 package ru.endlesscode.chatter.data.network
 
-interface DataContainer {
-    val type: String
-    val time: Long?
-    val data: Any?
+import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
+import org.junit.platform.runner.JUnitPlatform
+import org.junit.runner.RunWith
+import ru.endlesscode.chatter.data.json.bytesToData
+import ru.endlesscode.chatter.data.test.FileHelper
+import ru.endlesscode.chatter.di.DI
+import ru.endlesscode.chatter.entity.remote.AliveData
+import java.util.*
+import kotlin.test.assertEquals
 
-    object Type {
-        const val ALIVE = "alive"
-        const val MESSAGE = "message"
-        const val CONFIRM = "confirm"
-        const val NOTICE = "notice"
-        const val ERROR = "error"
+
+@RunWith(JUnitPlatform::class)
+class DataBytesConverterSpec : Spek({
+    val converter = DI.converter
+
+    on("deserialization") {
+        it("should return right AliveContainer") {
+            val result = FileHelper.readContainerJson("AliveOut")
+            val uuid = UUID.fromString("5cf3839c-8fbf-41eb-8a99-4fbaeb1c3213")
+            val excepted = AliveContainer(AliveData(uuid))
+            val actual: DataContainer = converter.bytesToData(result.toByteArray())
+
+            assertEquals(excepted, actual)
+        }
     }
-}
+})

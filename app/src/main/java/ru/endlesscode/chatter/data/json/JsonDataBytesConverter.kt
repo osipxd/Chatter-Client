@@ -23,18 +23,24 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.data.json
 
-interface DataContainer {
-    val type: String
-    val time: Long?
-    val data: Any?
+import com.google.gson.Gson
+import ru.endlesscode.chatter.extension.toPrintable
+import kotlin.reflect.KClass
 
-    object Type {
-        const val ALIVE = "alive"
-        const val MESSAGE = "message"
-        const val CONFIRM = "confirm"
-        const val NOTICE = "notice"
-        const val ERROR = "error"
+class JsonDataBytesConverter(private val gson: Gson) : DataBytesConverter {
+
+    override fun <T : Any> bytesToData(bytes: ByteArray, theClass: KClass<T>): T {
+        val json = bytes.toPrintable()
+        return gson.fromJson(json, theClass.java)
+    }
+
+    override fun dataToBytes(data: Any): ByteArray {
+        val json = gson.toJson(data)
+        return json.toByteArray()
     }
 }
+
+inline fun <reified T : Any> DataBytesConverter.bytesToData(bytes: ByteArray): T =
+        this.bytesToData(bytes, T::class)

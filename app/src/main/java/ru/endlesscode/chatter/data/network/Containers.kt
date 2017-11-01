@@ -32,40 +32,41 @@ import ru.endlesscode.chatter.entity.remote.NoticeData
 import ru.endlesscode.chatter.extension.millisSinceEpoch
 
 
-class AliveContainer(data: AliveData) : JsonDataContainer {
-    override val data: AliveData? = data // Null when container received from server
+data class AliveContainer(
+        override val data: AliveData?
+) : DataContainer {
     override val type = DataContainer.Type.ALIVE
     override val time: Long? = null
 }
 
 
-class MessageContainer(
+data class MessageContainer(
         override val data: MessageData
-) : JsonDataContainer {
+) : DataContainer {
     override val type = DataContainer.Type.MESSAGE
     override val time: Long = millisSinceEpoch()
 }
 
 
-class ConfirmContainer(
+data class ConfirmContainer(
         override val time: Long
-) : JsonDataContainer {
+) : DataContainer {
     override val type = DataContainer.Type.CONFIRM
     override val data: Any? = null
 }
 
 
-class NoticeContainer(
+data class NoticeContainer(
         override val time: Long,
         override val data: NoticeData
-) : JsonDataContainer {
+) : DataContainer {
     override val type = DataContainer.Type.NOTICE
 }
 
 
-class ErrorContainer(
+data class ErrorContainer(
         override val data: ErrorData
-) : JsonDataContainer {
+) : DataContainer {
     override val type: String = DataContainer.Type.ERROR
     override val time: Long? = null
 }

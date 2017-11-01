@@ -31,7 +31,7 @@ import dagger.Provides
 import ru.endlesscode.chatter.App
 
 @Module
-class AppModule(private val app: App) {
+open class AppModule(private val app: App) {
 
     @Provides
     fun provideContext(): Context = app

@@ -27,6 +27,7 @@ package ru.endlesscode.chatter.di
 
 import dagger.Component
 import ru.endlesscode.chatter.di.module.AppModule
+import ru.endlesscode.chatter.di.module.GsonModule
 import ru.endlesscode.chatter.di.module.MessagesModule
 import ru.endlesscode.chatter.di.module.NetworkModule
 import ru.endlesscode.chatter.ui.fragment.ChatFragment
@@ -36,7 +37,8 @@ import javax.inject.Singleton
 @Component(modules = arrayOf(
         AppModule::class,
         NetworkModule::class,
-        MessagesModule::class
+        MessagesModule::class,
+        GsonModule::class
 ))
 interface AppComponent {
 

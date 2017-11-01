@@ -27,6 +27,7 @@ package ru.endlesscode.chatter.di.module
 
 import dagger.Module
 import dagger.Provides
+import ru.endlesscode.chatter.data.json.DataBytesConverter
 import ru.endlesscode.chatter.data.network.ServerConnection
 import ru.endlesscode.chatter.data.network.UdpConnection
 import javax.inject.Singleton
@@ -37,7 +38,12 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideServerConnection(address: String, port: Int): ServerConnection = UdpConnection(address, port)
+    fun provideServerConnection(
+            address: String,
+            port: Int,
+            converter: DataBytesConverter
+    ): ServerConnection =
+            UdpConnection(address, port, converter)
 
     @Provides
     @Singleton

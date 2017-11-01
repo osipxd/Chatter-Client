@@ -29,6 +29,7 @@ import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.whenever
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
+import ru.endlesscode.chatter.di.DI
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.SocketTimeoutException
@@ -57,7 +58,7 @@ class DummyDatagramSocket : DatagramSocket() {
                 }
 
                 if (currentWaitTime >= responseTime && container != null) {
-                    val data = container.toByteArray()
+                    val data = DI.converter.dataToBytes(container)
                     val currData = packet.data
                     data.forEachIndexed { index, byte -> currData[index] = byte }
                     break

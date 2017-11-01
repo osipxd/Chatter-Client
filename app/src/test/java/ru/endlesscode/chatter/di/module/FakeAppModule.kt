@@ -23,18 +23,10 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.di.module
 
-interface DataContainer {
-    val type: String
-    val time: Long?
-    val data: Any?
+import com.nhaarman.mockito_kotlin.mock
+import dagger.Module
 
-    object Type {
-        const val ALIVE = "alive"
-        const val MESSAGE = "message"
-        const val CONFIRM = "confirm"
-        const val NOTICE = "notice"
-        const val ERROR = "error"
-    }
-}
+@Module
+class FakeAppModule : AppModule(mock())

@@ -23,18 +23,18 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.data.test
 
-interface DataContainer {
-    val type: String
-    val time: Long?
-    val data: Any?
+import java.net.URL
 
-    object Type {
-        const val ALIVE = "alive"
-        const val MESSAGE = "message"
-        const val CONFIRM = "confirm"
-        const val NOTICE = "notice"
-        const val ERROR = "error"
+object FileHelper {
+
+    fun readContainerJson(name: String) = readJson("container/$name")
+
+    fun readJson(name: String) = read("json/$name.json").readText()
+
+    private fun read(path: String): URL {
+        val classLoader = javaClass.classLoader
+        return classLoader.getResource(path)
     }
 }

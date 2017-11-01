@@ -35,6 +35,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
+import ru.endlesscode.chatter.di.DI
 import ru.endlesscode.chatter.entity.remote.AliveData
 import java.util.*
 import kotlin.test.assertEquals
@@ -47,7 +48,8 @@ class UdpConnectionSpec : Spek({
     val connection = UdpConnection(
             serverAddress = "localhost",
             serverPort = 4242,
-            channel = channel
+            channel = channel,
+            converter = DI.converter
     )
 
     given("a UdpConnection") {

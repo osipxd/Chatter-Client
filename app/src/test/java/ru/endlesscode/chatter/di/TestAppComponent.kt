@@ -23,18 +23,24 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.di
 
-interface DataContainer {
-    val type: String
-    val time: Long?
-    val data: Any?
+import dagger.Component
+import ru.endlesscode.chatter.data.json.DataBytesConverter
+import ru.endlesscode.chatter.di.module.FakeAppModule
+import ru.endlesscode.chatter.di.module.GsonModule
+import ru.endlesscode.chatter.di.module.MessagesModule
+import ru.endlesscode.chatter.di.module.NetworkModule
+import javax.inject.Singleton
 
-    object Type {
-        const val ALIVE = "alive"
-        const val MESSAGE = "message"
-        const val CONFIRM = "confirm"
-        const val NOTICE = "notice"
-        const val ERROR = "error"
-    }
+
+@Singleton
+@Component(modules = arrayOf(
+        FakeAppModule::class,
+        NetworkModule::class,
+        MessagesModule::class,
+        GsonModule::class
+))
+interface TestAppComponent : AppComponent {
+    fun converter(): DataBytesConverter
 }

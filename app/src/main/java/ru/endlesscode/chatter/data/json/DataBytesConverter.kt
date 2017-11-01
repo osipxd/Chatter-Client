@@ -23,10 +23,11 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.data.json
 
-import com.alibaba.fastjson.JSON
+import kotlin.reflect.KClass
 
-interface JsonDataContainer : DataContainer {
-    override fun toByteArray(): ByteArray = JSON.toJSONBytes(this)
+interface DataBytesConverter {
+    fun dataToBytes(data: Any): ByteArray
+    fun <T : Any> bytesToData(bytes: ByteArray, theClass: KClass<T>): T
 }

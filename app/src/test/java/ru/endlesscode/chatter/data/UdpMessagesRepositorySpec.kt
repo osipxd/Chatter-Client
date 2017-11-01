@@ -39,6 +39,7 @@ import ru.endlesscode.chatter.data.network.DummyDatagramChannel
 import ru.endlesscode.chatter.data.network.DummyDatagramSocket
 import ru.endlesscode.chatter.data.network.MessageContainer
 import ru.endlesscode.chatter.data.network.UdpConnection
+import ru.endlesscode.chatter.di.DI
 import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.entity.remote.MessageInData
 import kotlin.test.assertEquals
@@ -51,7 +52,8 @@ class UdpMessagesRepositorySpec : Spek({
     val connection = spy(UdpConnection(
             serverAddress = "localhost",
             serverPort = 4242,
-            channel = channel
+            channel = channel,
+            converter = DI.converter
     ))
     val repository = NetworkMessagesRepository(connection)
 

@@ -23,18 +23,12 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.di
 
-interface DataContainer {
-    val type: String
-    val time: Long?
-    val data: Any?
+import ru.endlesscode.chatter.data.json.DataBytesConverter
 
-    object Type {
-        const val ALIVE = "alive"
-        const val MESSAGE = "message"
-        const val CONFIRM = "confirm"
-        const val NOTICE = "notice"
-        const val ERROR = "error"
-    }
+object DI {
+    private val component by lazy { DaggerTestAppComponent.create() }
+
+    val converter: DataBytesConverter by lazy { component.converter() }
 }

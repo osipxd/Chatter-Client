@@ -23,18 +23,30 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.di.module
 
-interface DataContainer {
-    val type: String
-    val time: Long?
-    val data: Any?
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import dagger.Module
+import dagger.Provides
+import ru.endlesscode.chatter.data.json.DataBytesConverter
+import ru.endlesscode.chatter.data.json.DataContainerDeserializer
+import ru.endlesscode.chatter.data.json.JsonDataBytesConverter
+import ru.endlesscode.chatter.data.network.DataContainer
 
-    object Type {
-        const val ALIVE = "alive"
-        const val MESSAGE = "message"
-        const val CONFIRM = "confirm"
-        const val NOTICE = "notice"
-        const val ERROR = "error"
-    }
+
+@Module
+object GsonModule {
+
+    @Provides
+    @JvmStatic
+    fun provideDataBytesConverter(gson: Gson): DataBytesConverter
+            = JsonDataBytesConverter(gson)
+
+    @Provides
+    @JvmStatic
+    fun provideGson(): Gson = GsonBuilder().apply {
+        setPrettyPrinting()
+        registerTypeAdapter(DataContainer::class.java, DataContainerDeserializer())
+    }.create()
 }

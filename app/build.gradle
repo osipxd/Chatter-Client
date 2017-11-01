@@ -78,8 +78,7 @@ ext {
     coroutinesVersion = '0.19'
 
     // JSON
-    fastjsonVersion = '1.2.39'
-    fastjsonAndroidVersion = '1.1.64.android'
+    gsonVersion = '2.8.+'
 
     // Testing
     spekVersion = '1.1.5'
@@ -101,9 +100,10 @@ dependencies {
     kapt "com.arello-mobile:moxy-compiler:$moxyVersion"
     compile "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kaptTest "com.google.dagger:dagger-compiler:$daggerVersion"
 
     // JSON
-    compile "com.alibaba:fastjson:$fastjsonVersion"
+    compile "com.google.code.gson:gson:$gsonVersion"
 
     // Async
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"

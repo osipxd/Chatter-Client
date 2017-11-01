@@ -29,7 +29,8 @@ import android.support.annotation.VisibleForTesting
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import ru.endlesscode.chatter.extension.toDataContainer
+import ru.endlesscode.chatter.data.json.DataBytesConverter
+import ru.endlesscode.chatter.data.json.bytesToData
 import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -39,9 +40,11 @@ import java.nio.channels.DatagramChannel
 class UdpConnection(
         override val serverAddress: String,
         override val serverPort: Int,
-        override var handleData: (DataContainer) -> Unit = { },
+        private val converter: DataBytesConverter,
         private val channel: DatagramChannel = DatagramChannel.open()
 ) : ServerConnection {
+
+    override var handleData: (DataContainer) -> Unit = { }
 
     private val remoteAddress: InetSocketAddress
         get() = InetSocketAddress(InetAddress.getByName(serverAddress), serverPort)
@@ -72,12 +75,12 @@ class UdpConnection(
 
     private fun startChannelListening() {
         receiveJob = launch {
-            log("Starting messages listener...")
+            log("Starting data listener...")
             if (receiveJob?.waitConnection() == false) {
                 return@launch
             }
 
-            log("Messages listener successfully started!")
+            log("Data listener successfully started!")
             val buffer = allocateBuffer()
             while (listenChannel(buffer)) {
                 // Listen channel while returns true
@@ -91,9 +94,9 @@ class UdpConnection(
 
         try {
             channel.socket().receive(packet)
-            val container = packet.data.toDataContainer()
+            val container: DataContainer = converter.bytesToData(packet.data)
             handleData(container)
-            log("Message received: $container")
+            log("Data received: $container")
         } catch (e: Exception) {
             val job = receiveJob
             if (job!!.isCancelled) {
@@ -113,18 +116,18 @@ class UdpConnection(
     }
 
     @VisibleForTesting
-    internal suspend fun sendData(message: DataContainer) {
+    internal suspend fun sendData(data: DataContainer) {
         if (sendJob?.waitConnection() == false) {
             return
         }
 
         val buffer = allocateBuffer()
-        buffer.put(message.toByteArray())
+        buffer.put(converter.dataToBytes(data))
         buffer.flip()
 
         try {
             channel.write(buffer)
-            log("Message sent: $message")
+            log("Data sent: $data")
         } catch (e: Exception) {
             println(e.printStackTrace())
         }
@@ -149,9 +152,9 @@ class UdpConnection(
         receiveJob?.cancel()
         receiveJob?.join()
         log("Channel listener stopped.")
-        log("Awaiting end of message sending...")
+        log("Awaiting end of data sending...")
         sendJob?.join()
-        log("All messages sent.")
+        log("All data sent.")
 
         channel.close()
         log("Connection closed.")
