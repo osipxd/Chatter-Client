@@ -31,10 +31,12 @@ import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.context
+import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
+import ru.endlesscode.chatter.entity.remote.AliveData
+import java.util.*
 import kotlin.test.assertEquals
 
 
@@ -48,7 +50,7 @@ class UdpConnectionSpec : Spek({
             channel = channel
     )
 
-    context("sending message") {
+    given("a UdpConnection") {
         beforeGroup {
             connection.start()
         }
@@ -58,22 +60,22 @@ class UdpConnectionSpec : Spek({
             clearInvocations(channel)
         }
 
-        it("should successfully send message") {
-            val message = "Test message"
+        it("should successfully send data") {
+            val data = AliveContainer(AliveData(UUID.randomUUID()))
             runBlocking {
-                connection.sendMessage(message)
+                connection.sendData(data)
             }
-            verify(channel).messageSent(message)
+            verify(channel).dataSent(data)
         }
 
-        it("should successfully receive message") {
-            val message = "Test message"
-            var receivedMessage = ""
-            connection.handleMessage = { receivedMessage = it }
+        it("should successfully receive data") {
+            val data: DataContainer = AliveContainer(AliveData(UUID.randomUUID()))
+            var receivedData: DataContainer? = null
+            connection.handleData = { receivedData = it }
 
-            socket.sendMessageFromServer(message)
+            socket.sendDataFromServer(data)
             runBlocking { delay((socket.responseTime * 1.5).toLong()) }
-            assertEquals(message, receivedMessage)
+            assertEquals(data, receivedData)
         }
 
         afterGroup {

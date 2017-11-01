@@ -27,7 +27,7 @@ package ru.endlesscode.chatter.data.messages
 
 import ru.endlesscode.chatter.entity.local.Message
 
-class MessageImpl(
+data class MessageImpl(
         override val from: String,
         override val text: String
 ) : Message

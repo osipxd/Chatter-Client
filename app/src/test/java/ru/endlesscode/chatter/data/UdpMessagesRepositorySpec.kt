@@ -25,10 +25,7 @@
 
 package ru.endlesscode.chatter.data
 
-import com.nhaarman.mockito_kotlin.clearInvocations
-import com.nhaarman.mockito_kotlin.spy
-import com.nhaarman.mockito_kotlin.times
-import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.*
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.Spek
@@ -36,10 +33,14 @@ import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
+import ru.endlesscode.chatter.data.messages.MessageImpl
 import ru.endlesscode.chatter.data.messages.NetworkMessagesRepository
 import ru.endlesscode.chatter.data.network.DummyDatagramChannel
 import ru.endlesscode.chatter.data.network.DummyDatagramSocket
+import ru.endlesscode.chatter.data.network.MessageContainer
 import ru.endlesscode.chatter.data.network.UdpConnection
+import ru.endlesscode.chatter.entity.local.Message
+import ru.endlesscode.chatter.entity.remote.MessageInData
 import kotlin.test.assertEquals
 
 
@@ -60,28 +61,29 @@ class UdpMessagesRepositorySpec : Spek({
 
     on("sending message") {
         it("should send if queue is empty") {
-            val message = "empty queue"
+            val message = MessageImpl("client", "message for server")
             repository.sendMessage(message)
-            verify(connection).sendMessageAsync(message)
+            verify(connection).sendDataAsync(any())
         }
 
         it("should send after sending all messages in queue") {
-            val message = "other message"
+            val message = MessageImpl("client", "another message for server")
             repository.sendMessage(message)
-            verify(connection, times(0)).sendMessageAsync(message)
+            verify(connection, times(0)).sendDataAsync(any())
             runBlocking { delay(channel.sendTime) }
 
-            verify(connection).sendMessageAsync(message)
+            verify(connection).sendDataAsync(any())
         }
     }
 
     on("receiving message") {
-        var receivedMessage = ""
+        var receivedMessage: Message? = null
         repository.setMessageListener { receivedMessage = it }
 
         it("should receive message") {
-            val message = "message from server"
-            socket.sendMessageFromServer(message)
+            val message = MessageImpl("server", "message from server")
+            val messageData = MessageInData(message.from, message.text)
+            socket.sendDataFromServer(MessageContainer(messageData))
             runBlocking { delay(socket.responseTime) }
             assertEquals(message, receivedMessage)
         }

@@ -29,5 +29,5 @@ import java.util.*
 
 
 data class AliveData(
-        val uuid: UUID?
+        val uuid: UUID
 )

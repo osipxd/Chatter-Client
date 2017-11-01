@@ -40,24 +40,24 @@ class DummyDatagramSocket : DatagramSocket() {
 
     private var currentWaitTime: Long = 0
 
-    fun getMessage(): String? {
+    fun getContainer(): DataContainer? {
         return null
     }
 
     override fun receive(packet: DatagramPacket) {
         currentWaitTime = 0
         runBlocking {
-            var message = getMessage()
+            var container = getContainer()
             while (true) {
                 delay(deltaTime)
                 currentWaitTime += deltaTime
 
-                if (message == null) {
-                    message = getMessage()
+                if (container == null) {
+                    container = getContainer()
                 }
 
-                if (currentWaitTime >= responseTime && message != null) {
-                    val data = message.toByteArray()
+                if (currentWaitTime >= responseTime && container != null) {
+                    val data = container.toByteArray()
                     val currData = packet.data
                     data.forEachIndexed { index, byte -> currData[index] = byte }
                     break
@@ -68,7 +68,7 @@ class DummyDatagramSocket : DatagramSocket() {
         }
     }
 
-    fun sendMessageFromServer(message: String) {
-        whenever(this.getMessage()).doReturn(message).thenReturn(null)
+    fun sendDataFromServer(data: DataContainer) {
+        whenever(this.getContainer()).doReturn(data).thenReturn(null)
     }
 }

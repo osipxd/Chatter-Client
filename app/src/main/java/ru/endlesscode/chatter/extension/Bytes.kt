@@ -29,6 +29,8 @@ import com.alibaba.fastjson.JSON
 import ru.endlesscode.chatter.data.network.DataContainer
 import java.nio.ByteBuffer
 
+fun ByteBuffer.toDataContainer(): DataContainer = this.array().toDataContainer()
+
 fun ByteArray.toDataContainer(): DataContainer = this.trim().parseObject()
 
 inline fun <reified T> ByteArray.parseObject(): T = JSON.parseObject(this, T::class.java)

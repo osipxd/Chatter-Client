@@ -106,14 +106,14 @@ class UdpConnection(
     }
 
     override fun sendDataAsync(data: DataContainer): Job {
-        val job = launch { sendMessage(data) }
+        val job = launch { sendData(data) }
         sendJob = job
 
         return job
     }
 
     @VisibleForTesting
-    internal suspend fun sendMessage(message: DataContainer) {
+    internal suspend fun sendData(message: DataContainer) {
         if (sendJob?.waitConnection() == false) {
             return
         }
