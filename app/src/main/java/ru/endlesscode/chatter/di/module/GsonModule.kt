@@ -32,7 +32,9 @@ import dagger.Provides
 import ru.endlesscode.chatter.data.json.DataBytesConverter
 import ru.endlesscode.chatter.data.json.DataContainerDeserializer
 import ru.endlesscode.chatter.data.json.JsonDataBytesConverter
+import ru.endlesscode.chatter.data.json.MessageDataDeserializer
 import ru.endlesscode.chatter.data.network.DataContainer
+import ru.endlesscode.chatter.entity.remote.MessageData
 
 
 @Module
@@ -48,5 +50,6 @@ object GsonModule {
     fun provideGson(): Gson = GsonBuilder().apply {
         setPrettyPrinting()
         registerTypeAdapter(DataContainer::class.java, DataContainerDeserializer())
+        registerTypeAdapter(MessageData::class.java, MessageDataDeserializer())
     }.create()
 }

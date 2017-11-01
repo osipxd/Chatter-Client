@@ -1,0 +1,10 @@
+{
+  "type": "notice",
+  "time": 1509226961923,
+  "data": {
+    "reason": "error.no_user",
+    "args": [
+      "osipxd"
+    ]
+  }
+}

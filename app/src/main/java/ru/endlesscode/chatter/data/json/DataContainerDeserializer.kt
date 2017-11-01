@@ -44,7 +44,7 @@ class DataContainerDeserializer : JsonDeserializer<DataContainer> {
     ): DataContainer {
         val obj = json.asJsonObject
         if (!obj.has(TYPE))
-            throw IllegalArgumentException("JSON should container field \"type\"")
+            throw IllegalArgumentException("JSON should contain field \"type\"")
 
         val typeName = obj.get(TYPE).asString
         val type = when (typeName) {

@@ -23,33 +23,34 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.data.json
 
-import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
-import org.junit.platform.runner.JUnitPlatform
-import org.junit.runner.RunWith
-import ru.endlesscode.chatter.data.json.bytesToData
-import ru.endlesscode.chatter.data.test.FileHelper
-import ru.endlesscode.chatter.di.DI
-import ru.endlesscode.chatter.entity.remote.AliveData
-import java.util.*
-import kotlin.test.assertEquals
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import ru.endlesscode.chatter.entity.remote.MessageData
+import ru.endlesscode.chatter.entity.remote.MessageInData
+import ru.endlesscode.chatter.entity.remote.MessageOutData
+import java.lang.reflect.Type
 
+class MessageDataDeserializer : JsonDeserializer<MessageData> {
 
-@RunWith(JUnitPlatform::class)
-class DataBytesConverterSpec : Spek({
-    val converter = DI.converter
-
-    on("deserialization") {
-        it("should return right AliveContainer") {
-            val result = FileHelper.readContainerJson("AliveOut")
-            val uuid = UUID.fromString("5cf3839c-8fbf-41eb-8a99-4fbaeb1c3213")
-            val excepted = AliveContainer(AliveData(uuid))
-            val actual: DataContainer = converter.bytesToData(result.toByteArray())
-
-            assertEquals(excepted, actual)
-        }
+    companion object {
+        private const val UUID = "uuid"
     }
-})
+
+    override fun deserialize(
+            json: JsonElement,
+            typeOfT: Type,
+            context: JsonDeserializationContext
+    ): MessageData {
+        val obj = json.asJsonObject
+        val type = if (obj.has(UUID)) {
+            MessageOutData::class.java
+        } else {
+            MessageInData::class.java
+        }
+
+        return context.deserialize(obj, type)
+    }
+}

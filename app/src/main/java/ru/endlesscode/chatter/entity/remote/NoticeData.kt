@@ -25,11 +25,31 @@
 
 package ru.endlesscode.chatter.entity.remote
 
+import java.util.*
+
 data class NoticeData(
         val reason: String,
         val args: Array<String>
 ) {
     fun isError() {
         reason.startsWith("error")
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as NoticeData
+
+        if (reason != other.reason) return false
+        if (!Arrays.equals(args, other.args)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = reason.hashCode()
+        result = 31 * result + Arrays.hashCode(args)
+        return result
     }
 }

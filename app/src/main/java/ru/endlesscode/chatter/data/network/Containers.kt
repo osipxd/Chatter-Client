@@ -41,10 +41,10 @@ data class AliveContainer(
 
 
 data class MessageContainer(
-        override val data: MessageData
+        override val data: MessageData,
+        override val time: Long = millisSinceEpoch()
 ) : DataContainer {
     override val type = DataContainer.Type.MESSAGE
-    override val time: Long = millisSinceEpoch()
 }
 
 
