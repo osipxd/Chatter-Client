@@ -23,12 +23,10 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.messages
+package ru.endlesscode.chatter.entity.local
 
-import ru.endlesscode.chatter.entity.local.Message
 
-interface MessagesRepository {
-    fun sendMessage(message: Message)
-    fun setMessageListener(listener: (Message) -> Unit)
-    suspend fun finish()
+interface Message {
+    val from: String
+    val text: String
 }

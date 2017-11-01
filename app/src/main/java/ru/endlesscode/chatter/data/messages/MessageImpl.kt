@@ -27,8 +27,7 @@ package ru.endlesscode.chatter.data.messages
 
 import ru.endlesscode.chatter.entity.local.Message
 
-interface MessagesRepository {
-    fun sendMessage(message: Message)
-    fun setMessageListener(listener: (Message) -> Unit)
-    suspend fun finish()
-}
+class MessageImpl(
+        override val from: String,
+        override val text: String
+) : Message

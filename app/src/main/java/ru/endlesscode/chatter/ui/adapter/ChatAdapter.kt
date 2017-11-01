@@ -28,6 +28,7 @@ package ru.endlesscode.chatter.ui.adapter
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.extension.inflate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -44,11 +45,11 @@ class ChatAdapter @Inject constructor() : RecyclerView.Adapter<RecyclerView.View
             else notifyItemRemoved(loaderPosition)
         }
 
-    private var messages = emptyList<String>()
+    private var messages = emptyList<Message>()
     private val loaderPosition
         get() = messages.size
 
-    fun initItems(messages: List<String>) {
+    fun initItems(messages: List<Message>) {
         this.messages = messages
         showLoader = false
     }

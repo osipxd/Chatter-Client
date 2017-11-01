@@ -47,7 +47,7 @@
 
     <EditText
             android:id="@+id/messageEdit"
-            android:hint="@string/message"
+        android:hint="@string/messageView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/space_small"

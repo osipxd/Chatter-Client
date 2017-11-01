@@ -29,6 +29,7 @@ import com.arellomobile.mvp.MvpView
 import com.arellomobile.mvp.viewstate.strategy.AddToEndSingleStrategy
 import com.arellomobile.mvp.viewstate.strategy.SkipStrategy
 import com.arellomobile.mvp.viewstate.strategy.StateStrategyType
+import ru.endlesscode.chatter.entity.local.Message
 
 interface ChatView : MvpView {
     @StateStrategyType(SkipStrategy::class)
@@ -38,7 +39,7 @@ interface ChatView : MvpView {
     fun showNewMessage(position: Int)
 
     @StateStrategyType(AddToEndSingleStrategy::class)
-    fun initMessages(messages: List<String>)
+    fun initMessages(messages: List<Message>)
 
     @StateStrategyType(SkipStrategy::class)
     fun clearInput()

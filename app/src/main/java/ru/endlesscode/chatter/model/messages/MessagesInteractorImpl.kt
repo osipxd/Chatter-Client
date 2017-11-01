@@ -28,22 +28,26 @@ package ru.endlesscode.chatter.model.messages
 import android.content.Context
 import kotlinx.coroutines.experimental.launch
 import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.data.messages.MessageImpl
 import ru.endlesscode.chatter.data.messages.MessagesRepository
+import ru.endlesscode.chatter.entity.local.Message
 
 class MessagesInteractorImpl(
         private val context: Context,
         private val repository: MessagesRepository
 ) : MessagesInteractor {
 
-    override fun sendMessage(message: String, onError: (String) -> Unit) {
-        if (message.isNotEmpty()) {
+    override fun sendMessage(messageText: String, onError: (String) -> Unit) {
+        // TODO: What about "from"?
+        val message = MessageImpl("", messageText)
+        if (messageText.isNotEmpty()) {
             repository.sendMessage(message)
         } else {
             onError(context.getString(R.string.error_message_empty))
         }
     }
 
-    override fun setMessageListener(listener: (String) -> Unit) {
+    override fun setMessageListener(listener: (Message) -> Unit) {
         repository.setMessageListener(listener)
     }
 

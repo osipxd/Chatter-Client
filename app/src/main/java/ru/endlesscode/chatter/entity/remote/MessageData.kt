@@ -23,12 +23,23 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.messages
+package ru.endlesscode.chatter.entity.remote
 
-import ru.endlesscode.chatter.entity.local.Message
+import java.util.*
 
-interface MessagesRepository {
-    fun sendMessage(message: Message)
-    fun setMessageListener(listener: (Message) -> Unit)
-    suspend fun finish()
+
+interface MessageData {
+    val text: String
 }
+
+
+data class MessageInData(
+        val from: String,
+        override val text: String
+) : MessageData
+
+
+data class MessageOutData(
+        val uuid: UUID,
+        override val text: String
+) : MessageData

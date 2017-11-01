@@ -23,12 +23,13 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.messages
+package ru.endlesscode.chatter.entity.remote
 
-import ru.endlesscode.chatter.entity.local.Message
-
-interface MessagesRepository {
-    fun sendMessage(message: Message)
-    fun setMessageListener(listener: (Message) -> Unit)
-    suspend fun finish()
+data class NoticeData(
+        val reason: String,
+        val args: Array<String>
+) {
+    fun isError() {
+        reason.startsWith("error")
+    }
 }

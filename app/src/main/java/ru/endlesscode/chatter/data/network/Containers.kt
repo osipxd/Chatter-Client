@@ -25,15 +25,47 @@
 
 package ru.endlesscode.chatter.data.network
 
-import kotlinx.coroutines.experimental.Job
+import ru.endlesscode.chatter.entity.remote.AliveData
+import ru.endlesscode.chatter.entity.remote.ErrorData
+import ru.endlesscode.chatter.entity.remote.MessageData
+import ru.endlesscode.chatter.entity.remote.NoticeData
+import ru.endlesscode.chatter.extension.millisSinceEpoch
 
-interface ServerConnection {
 
-    val serverAddress: String
-    val serverPort: Int
-    var handleData: (DataContainer) -> Unit
+class AliveContainer(data: AliveData) : JsonDataContainer {
+    override val data: AliveData? = data // Null when container received from server
+    override val type = DataContainer.Type.ALIVE
+    override val time: Long? = null
+}
 
-    fun start()
-    fun sendDataAsync(data: DataContainer): Job
-    suspend fun stop()
+
+class MessageContainer(
+        override val data: MessageData
+) : JsonDataContainer {
+    override val type = DataContainer.Type.MESSAGE
+    override val time: Long = millisSinceEpoch()
+}
+
+
+class ConfirmContainer(
+        override val time: Long
+) : JsonDataContainer {
+    override val type = DataContainer.Type.CONFIRM
+    override val data: Any? = null
+}
+
+
+class NoticeContainer(
+        override val time: Long,
+        override val data: NoticeData
+) : JsonDataContainer {
+    override val type = DataContainer.Type.NOTICE
+}
+
+
+class ErrorContainer(
+        override val data: ErrorData
+) : JsonDataContainer {
+    override val type: String = DataContainer.Type.ERROR
+    override val time: Long? = null
 }

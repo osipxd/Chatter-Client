@@ -27,6 +27,7 @@ package ru.endlesscode.chatter.presentation.presenter
 
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
+import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.model.messages.MessagesInteractor
 import ru.endlesscode.chatter.presentation.view.ChatView
 import javax.inject.Inject
@@ -38,7 +39,7 @@ class ChatPresenter @Inject constructor(
         private val interactor: MessagesInteractor
 ) : MvpPresenter<ChatView>() {
 
-    private val messages = mutableListOf<String>()
+    private val messages = mutableListOf<Message>()
 
     init {
         interactor.setMessageListener(this::onMessageReceived)
@@ -51,7 +52,6 @@ class ChatPresenter @Inject constructor(
     }
 
     fun onSendPressed(text: String) {
-        messages.add(text)
         viewState.clearInput()
         showLastMessage()
         interactor.sendMessage(text, this::onError)
@@ -61,7 +61,7 @@ class ChatPresenter @Inject constructor(
         viewState.showError(errorMessage)
     }
 
-    private fun onMessageReceived(message: String) {
+    private fun onMessageReceived(message: Message) {
         messages.add(message)
         showLastMessage()
     }

@@ -25,25 +25,31 @@
 
 package ru.endlesscode.chatter.data.messages
 
+import ru.endlesscode.chatter.data.network.DataContainer
+import ru.endlesscode.chatter.data.network.MessageContainer
 import ru.endlesscode.chatter.data.network.ServerConnection
+import ru.endlesscode.chatter.entity.local.Message
+import ru.endlesscode.chatter.entity.remote.MessageInData
+import ru.endlesscode.chatter.entity.remote.MessageOutData
+import java.util.*
 
 
 class NetworkMessagesRepository(
         private val connection: ServerConnection
 ) : MessagesRepository {
 
-    private val messagesQueue = mutableListOf<String>()
+    private val messagesQueue = mutableListOf<Message>()
     private val isQueueFree: Boolean
         get() = messagesQueue.isEmpty()
 
-    private var listener: (String) -> Unit = { }
+    private var handleMessage: (Message) -> Unit = { }
 
     init {
         connection.start()
-        connection.handleMessage = this::handleMessage
+        connection.handleData = this::handleContainer
     }
 
-    override fun sendMessage(message: String) {
+    override fun sendMessage(message: Message) {
         if (isQueueFree) {
             messagesQueue.add(message)
             sendNextMessage()
@@ -54,7 +60,9 @@ class NetworkMessagesRepository(
 
     private fun sendNextMessage() {
         val message = this.messagesQueue.first()
-        connection.sendMessageAsync(message)
+        // TODO: Send real UUID
+        val data = MessageOutData(UUID.randomUUID(), message.text)
+        connection.sendDataAsync(MessageContainer(data))
                 .invokeOnCompletion { onMessageSent() }
     }
 
@@ -63,12 +71,19 @@ class NetworkMessagesRepository(
         if (!isQueueFree) sendNextMessage()
     }
 
-    override fun setMessageListener(listener: (String) -> Unit) {
-        this.listener = listener
+    override fun setMessageListener(listener: (Message) -> Unit) {
+        this.handleMessage = listener
     }
 
-    private fun handleMessage(message: String) {
-        listener(message)
+    private fun handleContainer(container: DataContainer) {
+        when (container) {
+            is MessageContainer -> handleMessage(container.data as MessageInData)
+        }
+    }
+
+    private fun handleMessage(data: MessageInData) {
+        val message = MessageImpl(data.from, data.text)
+        handleMessage(message)
     }
 
     override suspend fun finish() {

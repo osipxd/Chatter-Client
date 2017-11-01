@@ -29,6 +29,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_message.view.*
 import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.extension.inflate
 
 class MessageViewHolder(
@@ -36,10 +37,10 @@ class MessageViewHolder(
 ) : RecyclerView.ViewHolder(group.inflate(R.layout.item_message)) {
 
     private val author = itemView.author
-    private val message = itemView.message
+    private val messageView = itemView.message
 
-    fun init(messageText: String) {
-        author.text = "John Doe"
-        message.text = messageText
+    fun init(message: Message) {
+        author.text = message.from
+        messageView.text = message.text
     }
 }

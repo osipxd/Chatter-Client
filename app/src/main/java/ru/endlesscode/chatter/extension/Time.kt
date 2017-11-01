@@ -23,12 +23,6 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.messages
+package ru.endlesscode.chatter.extension
 
-import ru.endlesscode.chatter.entity.local.Message
-
-interface MessagesRepository {
-    fun sendMessage(message: Message)
-    fun setMessageListener(listener: (Message) -> Unit)
-    suspend fun finish()
-}
+fun millisSinceEpoch() = System.currentTimeMillis()

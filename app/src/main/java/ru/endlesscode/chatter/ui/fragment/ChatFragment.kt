@@ -39,6 +39,7 @@ import dagger.Lazy
 import kotlinx.android.synthetic.main.screen_chat.*
 import ru.endlesscode.chatter.App
 import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.presentation.presenter.ChatPresenter
 import ru.endlesscode.chatter.presentation.view.ChatView
 import ru.endlesscode.chatter.ui.adapter.ChatAdapter
@@ -96,7 +97,7 @@ class ChatFragment : MvpAppCompatFragment(), ChatView {
         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
     }
 
-    override fun initMessages(messages: List<String>) {
+    override fun initMessages(messages: List<Message>) {
         adapter.get().apply {
             initItems(messages)
             notifyDataSetChanged()

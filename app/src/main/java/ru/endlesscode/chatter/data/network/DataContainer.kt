@@ -23,12 +23,20 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.messages
+package ru.endlesscode.chatter.data.network
 
-import ru.endlesscode.chatter.entity.local.Message
+interface DataContainer {
+    val type: String
+    val time: Long?
+    val data: Any?
 
-interface MessagesRepository {
-    fun sendMessage(message: Message)
-    fun setMessageListener(listener: (Message) -> Unit)
-    suspend fun finish()
+    fun toByteArray(): ByteArray
+
+    object Type {
+        const val ALIVE = "alive"
+        const val MESSAGE = "message"
+        const val CONFIRM = "confirm"
+        const val NOTICE = "notice"
+        const val ERROR = "error"
+    }
 }

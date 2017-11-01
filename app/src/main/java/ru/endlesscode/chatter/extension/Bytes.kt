@@ -25,7 +25,13 @@
 
 package ru.endlesscode.chatter.extension
 
+import com.alibaba.fastjson.JSON
+import ru.endlesscode.chatter.data.network.DataContainer
 import java.nio.ByteBuffer
+
+fun ByteArray.toDataContainer(): DataContainer = this.trim().parseObject()
+
+inline fun <reified T> ByteArray.parseObject(): T = JSON.parseObject(this, T::class.java)
 
 fun ByteBuffer.toPrintable(): String = this.array().toPrintable()
 

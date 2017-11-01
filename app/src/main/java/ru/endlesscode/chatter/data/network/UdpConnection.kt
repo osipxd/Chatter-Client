@@ -29,7 +29,7 @@ import android.support.annotation.VisibleForTesting
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import ru.endlesscode.chatter.extension.toPrintable
+import ru.endlesscode.chatter.extension.toDataContainer
 import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -39,7 +39,7 @@ import java.nio.channels.DatagramChannel
 class UdpConnection(
         override val serverAddress: String,
         override val serverPort: Int,
-        override var handleMessage: (String) -> Unit = { },
+        override var handleData: (DataContainer) -> Unit = { },
         private val channel: DatagramChannel = DatagramChannel.open()
 ) : ServerConnection {
 
@@ -91,9 +91,9 @@ class UdpConnection(
 
         try {
             channel.socket().receive(packet)
-            val message = packet.data.toPrintable()
-            handleMessage(message)
-            log("Message received: $message")
+            val container = packet.data.toDataContainer()
+            handleData(container)
+            log("Message received: $container")
         } catch (e: Exception) {
             val job = receiveJob
             if (job!!.isCancelled) {
@@ -105,15 +105,15 @@ class UdpConnection(
         return true
     }
 
-    override fun sendMessageAsync(message: String): Job {
-        val job = launch { sendMessage(message) }
+    override fun sendDataAsync(data: DataContainer): Job {
+        val job = launch { sendMessage(data) }
         sendJob = job
 
         return job
     }
 
     @VisibleForTesting
-    internal suspend fun sendMessage(message: String) {
+    internal suspend fun sendMessage(message: DataContainer) {
         if (sendJob?.waitConnection() == false) {
             return
         }
