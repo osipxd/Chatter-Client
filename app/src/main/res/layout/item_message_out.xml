@@ -25,30 +25,34 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="vertical"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginBottom="@dimen/space_half_small"
-              android:layout_marginTop="@dimen/space_half_small"
-              android:background="@drawable/chat_bubble">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="end"
+    android:layout_marginBottom="@dimen/space_half_small"
+    android:layout_marginStart="@dimen/message_free_space"
+    android:layout_marginTop="@dimen/space_half_small"
+    android:background="@drawable/chat_bubble_out"
+    android:orientation="vertical">
 
     <TextView
-            android:id="@+id/author"
-            tools:text="John Doe"
-            android:padding="@dimen/space_small"
-            android:textColor="@color/colorPrimaryDark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawablePadding="@dimen/space_small"/>
+        android:id="@+id/message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="@dimen/space_small"
+        android:paddingStart="@dimen/space_small"
+        android:paddingTop="@dimen/space_small"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec commodo neque at massa ornare fringilla vel vel purus. Phasellus tristique congue aliquet." />
 
     <TextView
-            android:id="@+id/message"
-            android:paddingStart="@dimen/space_small"
-            android:paddingEnd="@dimen/space_small"
-            android:paddingBottom="@dimen/space_small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="Hello! How are you?"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:drawablePadding="@dimen/space_half_small"
+        android:paddingEnd="@dimen/space_half_small"
+        android:paddingStart="@dimen/space_half_small"
+        android:textSize="12sp"
+        tools:drawableEnd="@drawable/ic_done_black_14dp"
+        tools:text="15:42" />
 
 </LinearLayout>
