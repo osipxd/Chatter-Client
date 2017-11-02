@@ -59,7 +59,7 @@
             android:paddingEnd="@dimen/space_half_small"
             android:paddingStart="@dimen/space_half_small"
             android:textSize="12sp"
-            tools:drawableEnd="@drawable/ic_done_black_14dp"
+            android:drawableEnd="@drawable/ic_access_time_black_14dp"
             tools:text="15:42" />
 
     </LinearLayout>
