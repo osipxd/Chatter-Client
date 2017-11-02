@@ -26,8 +26,12 @@
 package ru.endlesscode.chatter.data.messages
 
 import ru.endlesscode.chatter.entity.local.Message
+import java.util.*
 
 data class MessageImpl(
         override val from: String,
-        override val text: String
-) : Message
+        override val text: String,
+        override val date: Date
+) : Message {
+    constructor(from: String, text: String, time: Long) : this(from, text, Date(time))
+}

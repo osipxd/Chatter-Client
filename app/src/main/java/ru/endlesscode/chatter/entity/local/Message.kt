@@ -25,8 +25,11 @@
 
 package ru.endlesscode.chatter.entity.local
 
+import java.util.*
+
 
 interface Message {
     val from: String
     val text: String
+    val date: Date
 }

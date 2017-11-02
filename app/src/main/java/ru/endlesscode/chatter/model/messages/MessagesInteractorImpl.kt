@@ -39,7 +39,7 @@ class MessagesInteractorImpl(
 
     override fun sendMessage(messageText: String, onError: (String) -> Unit) {
         // TODO: What about "from"?
-        val message = MessageImpl("", messageText)
+        val message = MessageImpl("", messageText, 1322018752992)
         if (messageText.isNotEmpty()) {
             repository.sendMessage(message)
         } else {

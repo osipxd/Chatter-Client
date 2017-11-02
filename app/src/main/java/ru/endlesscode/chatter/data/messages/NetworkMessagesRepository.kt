@@ -77,12 +77,13 @@ class NetworkMessagesRepository(
 
     private fun handleContainer(container: DataContainer) {
         when (container) {
-            is MessageContainer -> handleMessage(container.data as MessageInData)
+            is MessageContainer -> handleMessage(container)
         }
     }
 
-    private fun handleMessage(data: MessageInData) {
-        val message = MessageImpl(data.from, data.text)
+    private fun handleMessage(container: MessageContainer) {
+        val data = container.data as MessageInData
+        val message = MessageImpl(data.from, data.text, container.time)
         handleMessage(message)
     }
 

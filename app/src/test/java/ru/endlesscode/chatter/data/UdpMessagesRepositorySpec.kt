@@ -69,13 +69,13 @@ class UdpMessagesRepositorySpec : Spek({
         }
 
         it("should send if queue is empty") {
-            val message = MessageImpl("client", "message for server")
+            val message = MessageImpl("client", "message for server", 1322018752992L)
             repository.sendMessage(message)
             verify(connection).sendDataAsync(any())
         }
 
         it("should send after sending all messages in queue") {
-            val message = MessageImpl("client", "another message for server")
+            val message = MessageImpl("client", "another message for server", 1322018752992L)
             repository.sendMessage(message)
             verify(connection, times(0)).sendDataAsync(any())
             runBlocking { delay((channel.sendTime * 1.2).toLong()) }
@@ -89,7 +89,7 @@ class UdpMessagesRepositorySpec : Spek({
         repository.setMessageListener { receivedMessage = it }
 
         xit("should receive message") {
-            val message = MessageImpl("server", "message from server")
+            val message = MessageImpl("server", "message from server", 1322018752992L)
             val messageData = MessageInData(message.from, message.text)
             socket.sendDataFromServer(MessageContainer(messageData))
             runBlocking { delay((socket.responseTime * 1.5).toLong()) }
