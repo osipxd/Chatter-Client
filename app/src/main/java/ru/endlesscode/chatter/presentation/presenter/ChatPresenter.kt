@@ -27,6 +27,7 @@ package ru.endlesscode.chatter.presentation.presenter
 
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
+import ru.endlesscode.chatter.data.messages.MessageOut
 import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.model.messages.MessagesInteractor
 import ru.endlesscode.chatter.presentation.view.ChatView
@@ -54,7 +55,10 @@ class ChatPresenter @Inject constructor(
     fun onSendPressed(text: String) {
         viewState.clearInput()
         showLastMessage()
-        interactor.sendMessage(text, this::onError)
+
+        val message = MessageOut(text)
+        messages.add(message)
+        interactor.sendMessage(message, this::onError)
     }
 
     private fun onError(errorMessage: String) {

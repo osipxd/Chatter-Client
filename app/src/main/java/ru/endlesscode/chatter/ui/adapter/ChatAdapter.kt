@@ -28,6 +28,7 @@ package ru.endlesscode.chatter.ui.adapter
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.data.messages.MessageOut
 import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.extension.inflate
 import javax.inject.Inject
@@ -54,12 +55,14 @@ class ChatAdapter @Inject constructor() : RecyclerView.Adapter<RecyclerView.View
         showLoader = false
     }
 
-    override fun getItemViewType(position: Int): Int =
-            when {
-                position == loaderPosition -> ListItemTypes.LOADER
-                messages[position].isFromMe -> ListItemTypes.MESSAGE_OUT
-                else -> ListItemTypes.MESSAGE_IN
-            }
+    override fun getItemViewType(position: Int): Int {
+        if (position == loaderPosition) return ListItemTypes.LOADER
+
+        return when (messages[position]) {
+            is MessageOut -> ListItemTypes.MESSAGE_OUT
+            else -> ListItemTypes.MESSAGE_IN
+        }
+    }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is MessageViewHolder) {

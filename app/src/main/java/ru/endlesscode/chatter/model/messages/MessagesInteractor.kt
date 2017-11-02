@@ -28,7 +28,7 @@ package ru.endlesscode.chatter.model.messages
 import ru.endlesscode.chatter.entity.local.Message
 
 interface MessagesInteractor {
-    fun sendMessage(messageText: String, onError: (String) -> Unit)
+    fun sendMessage(message: Message, onError: (String) -> Unit)
     fun setMessageListener(listener: (Message) -> Unit)
     fun finish(onFinished: () -> Unit)
 }

@@ -83,7 +83,7 @@ class NetworkMessagesRepository(
 
     private fun handleMessage(container: MessageContainer) {
         val data = container.data as MessageInData
-        val message = MessageImpl(data.from, data.text, container.time)
+        val message = MessageIn(data.from, data.text, container.time)
         handleMessage(message)
     }
 

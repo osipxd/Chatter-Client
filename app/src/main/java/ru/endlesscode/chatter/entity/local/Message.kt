@@ -32,7 +32,4 @@ interface Message {
     val from: String
     val text: String
     val date: Date
-
-    val isFromMe: Boolean
-        get() = from.isEmpty()
 }

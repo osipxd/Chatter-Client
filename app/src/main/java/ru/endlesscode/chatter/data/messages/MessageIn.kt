@@ -23,34 +23,15 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.model.messages
+package ru.endlesscode.chatter.data.messages
 
-import android.content.Context
-import kotlinx.coroutines.experimental.launch
-import ru.endlesscode.chatter.R
-import ru.endlesscode.chatter.data.messages.MessagesRepository
 import ru.endlesscode.chatter.entity.local.Message
+import java.util.*
 
-class MessagesInteractorImpl(
-        private val context: Context,
-        private val repository: MessagesRepository
-) : MessagesInteractor {
-
-    override fun sendMessage(message: Message, onError: (String) -> Unit) {
-        if (message.text.isNotEmpty()) {
-            repository.sendMessage(message)
-        } else {
-            onError(context.getString(R.string.error_message_empty))
-        }
-    }
-
-    override fun setMessageListener(listener: (Message) -> Unit) {
-        repository.setMessageListener(listener)
-    }
-
-    override fun finish(onFinished: () -> Unit) {
-        launch {
-            repository.finish()
-        }.invokeOnCompletion { onFinished() }
-    }
+data class MessageIn(
+        override val from: String,
+        override val text: String,
+        override val date: Date
+) : Message {
+    constructor(from: String, text: String, time: Long) : this(from, text, Date(time))
 }

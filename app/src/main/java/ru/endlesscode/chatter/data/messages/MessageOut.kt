@@ -28,10 +28,9 @@ package ru.endlesscode.chatter.data.messages
 import ru.endlesscode.chatter.entity.local.Message
 import java.util.*
 
-data class MessageImpl(
-        override val from: String,
+class MessageOut(
         override val text: String,
-        override val date: Date
+        override val date: Date = Date()
 ) : Message {
-    constructor(from: String, text: String, time: Long) : this(from, text, Date(time))
+    override val from: String = ""
 }
