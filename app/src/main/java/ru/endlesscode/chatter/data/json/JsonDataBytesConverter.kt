@@ -41,6 +41,3 @@ class JsonDataBytesConverter(private val gson: Gson) : DataBytesConverter {
         return json.toByteArray()
     }
 }
-
-inline fun <reified T : Any> DataBytesConverter.bytesToData(bytes: ByteArray): T =
-        this.bytesToData(bytes, T::class)

@@ -31,3 +31,6 @@ interface DataBytesConverter {
     fun dataToBytes(data: Any): ByteArray
     fun <T : Any> bytesToData(bytes: ByteArray, theClass: KClass<T>): T
 }
+
+inline fun <reified T : Any> DataBytesConverter.bytesToData(bytes: ByteArray): T =
+        this.bytesToData(bytes, T::class)
