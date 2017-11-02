@@ -25,22 +25,15 @@
 
 package ru.endlesscode.chatter.ui.adapter
 
+import android.support.annotation.LayoutRes
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.item_message_in.view.*
-import ru.endlesscode.chatter.R
 import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.extension.inflate
 
-class MessageViewHolder(
-        group: ViewGroup
-) : RecyclerView.ViewHolder(group.inflate(R.layout.item_message_in)) {
-
-    private val author = itemView.author
-    private val messageView = itemView.message
-
-    fun init(message: Message) {
-        author.text = message.from
-        messageView.text = message.text
-    }
+abstract class MessageViewHolder(
+        parent: ViewGroup,
+        @LayoutRes layoutId: Int
+) : RecyclerView.ViewHolder(parent.inflate(layoutId)) {
+    abstract fun init(message: Message)
 }

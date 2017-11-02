@@ -27,5 +27,6 @@ package ru.endlesscode.chatter.ui.adapter
 
 object ListItemTypes {
     const val LOADER = 0
-    const val MESSAGE = 1
+    const val MESSAGE_IN = 1
+    const val MESSAGE_OUT = 2
 }

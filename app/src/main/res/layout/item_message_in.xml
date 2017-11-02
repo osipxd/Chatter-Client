@@ -32,7 +32,8 @@
     android:layout_marginEnd="@dimen/message_free_space"
     android:layout_marginTop="@dimen/space_half_small"
     android:background="@drawable/chat_bubble"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".ui.adapter.MessageInViewHolder">
 
     <TextView
         android:id="@+id/author"
@@ -53,6 +54,7 @@
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec commodo neque at massa ornare fringilla vel vel purus. Phasellus tristique congue aliquet. " />
 
     <TextView
+        android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"

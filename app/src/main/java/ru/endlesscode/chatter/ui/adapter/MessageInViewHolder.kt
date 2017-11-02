@@ -23,14 +23,25 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.extension
+package ru.endlesscode.chatter.ui.adapter
 
-import java.text.SimpleDateFormat
-import java.util.*
+import android.view.ViewGroup
+import kotlinx.android.synthetic.main.item_message_in.view.*
+import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.entity.local.Message
+import ru.endlesscode.chatter.extension.getPrintableTime
 
-fun millisSinceEpoch() = System.currentTimeMillis()
+class MessageInViewHolder(
+        parent: ViewGroup
+) : MessageViewHolder(parent, R.layout.item_message_in) {
 
-fun Date.getPrintableTime(): String = this.format("HH:mm")
+    private val author = itemView.author
+    private val messageView = itemView.message
+    private val time = itemView.time
 
-fun Date.format(pattern: String): String =
-        SimpleDateFormat(pattern, Locale.US).format(this)
+    override fun init(message: Message) {
+        author.text = message.from
+        messageView.text = message.text
+        time.text = message.date.getPrintableTime()
+    }
+}

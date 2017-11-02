@@ -55,7 +55,11 @@ class ChatAdapter @Inject constructor() : RecyclerView.Adapter<RecyclerView.View
     }
 
     override fun getItemViewType(position: Int): Int =
-            if (position == loaderPosition) ListItemTypes.LOADER else ListItemTypes.MESSAGE
+            when {
+                position == loaderPosition -> ListItemTypes.LOADER
+                messages[position].isFromMe -> ListItemTypes.MESSAGE_OUT
+                else -> ListItemTypes.MESSAGE_IN
+            }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is MessageViewHolder) {
@@ -65,7 +69,8 @@ class ChatAdapter @Inject constructor() : RecyclerView.Adapter<RecyclerView.View
 
     override fun onCreateViewHolder(group: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            ListItemTypes.MESSAGE -> MessageViewHolder(group)
+            ListItemTypes.MESSAGE_IN -> MessageInViewHolder(group)
+            ListItemTypes.MESSAGE_OUT -> MessageOutViewHolder(group)
             ListItemTypes.LOADER -> LoaderViewHolder(group)
             else -> throw IllegalArgumentException("Unknown view type: $viewType")
         }
