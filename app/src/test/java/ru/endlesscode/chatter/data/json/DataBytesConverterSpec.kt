@@ -28,17 +28,23 @@ package ru.endlesscode.chatter.data.json
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.it
-import org.junit.platform.runner.JUnitPlatform
-import org.junit.runner.RunWith
-import ru.endlesscode.chatter.data.network.*
+import ru.endlesscode.chatter.data.network.AliveContainer
+import ru.endlesscode.chatter.data.network.ConfirmContainer
+import ru.endlesscode.chatter.data.network.DataContainer
+import ru.endlesscode.chatter.data.network.ErrorContainer
+import ru.endlesscode.chatter.data.network.MessageContainer
+import ru.endlesscode.chatter.data.network.NoticeContainer
 import ru.endlesscode.chatter.data.test.FileHelper
 import ru.endlesscode.chatter.di.DI
-import ru.endlesscode.chatter.entity.remote.*
+import ru.endlesscode.chatter.entity.remote.AliveData
+import ru.endlesscode.chatter.entity.remote.ErrorData
+import ru.endlesscode.chatter.entity.remote.MessageInData
+import ru.endlesscode.chatter.entity.remote.MessageOutData
+import ru.endlesscode.chatter.entity.remote.NoticeData
 import java.util.*
 import kotlin.test.assertEquals
 
 
-@RunWith(JUnitPlatform::class)
 class DataBytesConverterSpec : Spek({
     val converter = DI.converter
 

@@ -25,7 +25,11 @@
 
 package ru.endlesscode.chatter.data
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.clearInvocations
+import com.nhaarman.mockito_kotlin.spy
+import com.nhaarman.mockito_kotlin.times
+import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.Spek
@@ -33,8 +37,6 @@ import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.jetbrains.spek.api.dsl.xit
-import org.junit.platform.runner.JUnitPlatform
-import org.junit.runner.RunWith
 import ru.endlesscode.chatter.data.messages.MessageIn
 import ru.endlesscode.chatter.data.messages.NetworkMessagesRepository
 import ru.endlesscode.chatter.data.network.DummyDatagramChannel
@@ -47,7 +49,6 @@ import ru.endlesscode.chatter.entity.remote.MessageInData
 import kotlin.test.assertEquals
 
 
-@RunWith(JUnitPlatform::class)
 class UdpMessagesRepositorySpec : Spek({
     val socket = spy(DummyDatagramSocket())
     val channel = spy(DummyDatagramChannel(socket))

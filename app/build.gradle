@@ -1,33 +1,9 @@
-/*
- * This file is part of Chatter, licensed under the MIT License (MIT).
- *
- * Copyright (c) Osip Fatkullin <osip.fatkullin@gmail.com>
- * Copyright (c) contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'idea'
+apply plugin: 'de.mannodermaus.android-junit5'
 
 android {
     compileSdkVersion 26
@@ -48,8 +24,13 @@ android {
         }
     }
 
-    testOptions.unitTests {
-        returnDefaultValues = true
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
     }
 }
 
@@ -58,14 +39,22 @@ kapt {
     correctErrorTypes = true
 }
 
+junitPlatform {
+    filters {
+        engines {
+            include 'spek'
+        }
+    }
+}
+
 kotlin {
     experimental {
-        coroutines "enable"
+        coroutines 'enable'
     }
 }
 
 ext {
-    supportVersion = '26.+'
+    supportVersion = '26.1.+'
 
     // UI
     constraintLayoutVersion = '1.0.+'
@@ -75,7 +64,7 @@ ext {
     daggerVersion = '2.12'
 
     // Async
-    coroutinesVersion = '0.19'
+    coroutinesVersion = '0.19.+'
 
     // JSON
     gsonVersion = '2.8.+'
@@ -83,43 +72,69 @@ ext {
     // Testing
     spekVersion = '1.1.5'
     mockitoVersion = '2.11.+'
-    mockitoKotlinVersion = '1.5.+'
+    mockitoKotlinVersion = '1.5.0'
 }
 
 dependencies {
-    compile "com.android.support:appcompat-v7:$supportVersion"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    implementation "com.android.support:appcompat-v7:$supportVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
 
     // UI
-    compile "com.android.support:design:$supportVersion"
-    compile "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
+    implementation "com.android.support:design:$supportVersion"
+    implementation "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
 
     // Arch
-    compile "com.arello-mobile:moxy:$moxyVersion"
-    compile "com.arello-mobile:moxy-app-compat:$moxyVersion"
+    implementation "com.arello-mobile:moxy:$moxyVersion"
+    implementation "com.arello-mobile:moxy-app-compat:$moxyVersion"
     kapt "com.arello-mobile:moxy-compiler:$moxyVersion"
-    compile "com.google.dagger:dagger:$daggerVersion"
+    implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kaptTest "com.google.dagger:dagger-compiler:$daggerVersion"
 
     // JSON
-    compile "com.google.code.gson:gson:$gsonVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
 
     // Async
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
 
     // Testing
-    testCompile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
-    testCompile "org.jetbrains.spek:spek-api:$spekVersion"
-    testCompile "org.jetbrains.spek:spek-junit-platform-engine:$spekVersion"
-    testCompile "org.junit.platform:junit-platform-runner:1.0.0"
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
-    testCompile "org.mockito:mockito-inline:$mockitoVersion"
-    testCompile "com.nhaarman:mockito-kotlin-kt1.1:$mockitoKotlinVersion"
+    testImplementation junit5()
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    testImplementation("org.jetbrains.spek:spek-api:$spekVersion") {
+        exclude group: "org.jetbrains.kotlin"
+    }
+    testImplementation("org.jetbrains.spek:spek-junit-platform-engine:$spekVersion") {
+        exclude group: "org.junit.platform"
+        exclude group: "org.jetbrains.kotlin"
+    }
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.mockito:mockito-inline:$mockitoVersion"
+    testImplementation "com.nhaarman:mockito-kotlin-kt1.1:$mockitoKotlinVersion"
+    testCompileOnly junit5EmbeddedRuntime()
 }
 
-repositories {
-    mavenCentral()
-    maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
+// Configure AS 3.0 to copy over Kotlin classes for each build type to where the IDE can pick them up
+afterEvaluate {
+    android.buildTypes.each {
+        def name = it.name
+
+        def copyTestTask = project.task(type: Copy, "copyKotlin${name.capitalize()}UnitTestClasses") {
+            from "build/tmp/kotlin-classes/${name}UnitTest"
+            into "build/intermediates/classes/test/$name"
+        }
+
+        if (project.tasks.findByName("compile${name.capitalize()}UnitTestKotlin") != null) {
+            project.tasks.getByName("compile${name.capitalize()}UnitTestKotlin").finalizedBy copyTestTask
+        }
+
+        def copyMainTask = project.task(type: Copy, "copyKotlin${name.capitalize()}Classes") {
+            from "build/tmp/kotlin-classes/$name"
+            into "build/intermediates/classes/$name"
+        }
+
+        if (project.tasks.findByName("compile${name.capitalize()}Kotlin") != null) {
+            project.tasks.getByName("compile${name.capitalize()}Kotlin").finalizedBy copyMainTask
+        }
+    }
 }
