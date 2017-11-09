@@ -65,21 +65,18 @@ class ChatAdapter @Inject constructor() : RecyclerView.Adapter<RecyclerView.View
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is MessageViewHolder) {
-            holder.init(messages[position])
-        }
+        (holder as? MessageViewHolder)?.init(messages[position])
     }
 
-    override fun onCreateViewHolder(group: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType) {
-            ListItemTypes.MESSAGE_IN -> MessageInViewHolder(group)
-            ListItemTypes.MESSAGE_OUT -> MessageOutViewHolder(group)
-            ListItemTypes.LOADER -> LoaderViewHolder(group)
-            else -> throw IllegalArgumentException("Unknown view type: $viewType")
-        }
+    override fun onCreateViewHolder(group: ViewGroup, viewType: Int) = when (viewType) {
+        ListItemTypes.MESSAGE_IN -> MessageInViewHolder(group)
+        ListItemTypes.MESSAGE_OUT -> MessageOutViewHolder(group)
+        ListItemTypes.LOADER -> LoaderViewHolder(group)
+        else -> throw IllegalArgumentException("Unknown view type: $viewType")
     }
 
     override fun getItemCount(): Int = if (showLoader) messages.size + 1 else messages.size
 
-    inner class LoaderViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(parent.inflate(R.layout.item_loader))
+    inner class LoaderViewHolder(parent: ViewGroup) :
+            RecyclerView.ViewHolder(parent.inflate(R.layout.item_loader))
 }
