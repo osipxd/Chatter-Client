@@ -27,10 +27,12 @@ package ru.endlesscode.chatter.presentation.presenter
 
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
+import ru.endlesscode.chatter.data.messages.MessageIn
 import ru.endlesscode.chatter.data.messages.MessageOut
 import ru.endlesscode.chatter.entity.local.Message
 import ru.endlesscode.chatter.model.messages.MessagesInteractor
 import ru.endlesscode.chatter.presentation.view.ChatView
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,7 +42,12 @@ class ChatPresenter @Inject constructor(
         private val interactor: MessagesInteractor
 ) : MvpPresenter<ChatView>() {
 
-    private val messages = mutableListOf<Message>()
+    // Fake messages
+    private val messages = mutableListOf<Message>(
+            MessageIn("space1flash", "Привет! Пробуем чатик.", Date()),
+            MessageIn("ana_besk", "Пишу что-то динное предлинное Чтобы занимало сразу несколько строчек, но при этом не должно заезжать слишком вбок и должно занимать в ширину примерно 3/4 экрана.", Date()),
+            MessageOut("Вроде, всё норм.", Date())
+    )
 
     init {
         interactor.setMessageListener(this::onMessageReceived)

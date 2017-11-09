@@ -30,7 +30,11 @@ import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import ru.endlesscode.chatter.data.json.bytesToData
 import ru.endlesscode.chatter.di.DI
-import java.net.*
+import java.net.DatagramSocket
+import java.net.InetAddress
+import java.net.NetworkInterface
+import java.net.SocketAddress
+import java.net.SocketOption
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 import java.nio.channels.MembershipKey

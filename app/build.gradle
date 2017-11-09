@@ -7,7 +7,7 @@ apply plugin: 'de.mannodermaus.android-junit5'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "ru.endlesscode.chatter"
         minSdkVersion 21
@@ -54,24 +54,24 @@ kotlin {
 }
 
 ext {
-    supportVersion = '26.1.+'
+    supportVersion = '26.1.0'
 
     // UI
-    constraintLayoutVersion = '1.0.+'
+    constraintLayoutVersion = '1.0.2'
 
     // Arch
-    moxyVersion = '1.5.+'
+    moxyVersion = '1.5.3'
     daggerVersion = '2.12'
 
     // Async
-    coroutinesVersion = '0.19.+'
+    coroutinesVersion = '0.19.3'
 
     // JSON
-    gsonVersion = '2.8.+'
+    gsonVersion = '2.8.2'
 
     // Testing
     spekVersion = '1.1.5'
-    mockitoVersion = '2.11.+'
+    mockitoVersion = '2.11.0'
     mockitoKotlinVersion = '1.5.0'
 }
 
@@ -116,25 +116,18 @@ dependencies {
 
 // Configure AS 3.0 to copy over Kotlin classes for each build type to where the IDE can pick them up
 afterEvaluate {
-    android.buildTypes.each {
-        def name = it.name
-
-        def copyTestTask = project.task(type: Copy, "copyKotlin${name.capitalize()}UnitTestClasses") {
-            from "build/tmp/kotlin-classes/${name}UnitTest"
-            into "build/intermediates/classes/test/$name"
-        }
-
-        if (project.tasks.findByName("compile${name.capitalize()}UnitTestKotlin") != null) {
-            project.tasks.getByName("compile${name.capitalize()}UnitTestKotlin").finalizedBy copyTestTask
-        }
-
-        def copyMainTask = project.task(type: Copy, "copyKotlin${name.capitalize()}Classes") {
-            from "build/tmp/kotlin-classes/$name"
-            into "build/intermediates/classes/$name"
-        }
-
-        if (project.tasks.findByName("compile${name.capitalize()}Kotlin") != null) {
-            project.tasks.getByName("compile${name.capitalize()}Kotlin").finalizedBy copyMainTask
-        }
+    compileDebugUnitTestKotlin {
+        finalizedBy copyKotlinDebugUnitTestClasses
+        finalizedBy copyKotlinDebugClasses
     }
+}
+
+task copyKotlinDebugUnitTestClasses(type: Copy) {
+    from "build/tmp/kotlin-classes/debugUnitTest"
+    into "build/intermediates/classes/test/debug"
+}
+
+task copyKotlinDebugClasses(type: Copy) {
+    from "build/tmp/kotlin-classes/debug"
+    into "build/intermediates/classes/debug"
 }

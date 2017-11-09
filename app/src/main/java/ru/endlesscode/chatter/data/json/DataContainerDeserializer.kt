@@ -28,7 +28,12 @@ package ru.endlesscode.chatter.data.json
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
-import ru.endlesscode.chatter.data.network.*
+import ru.endlesscode.chatter.data.network.AliveContainer
+import ru.endlesscode.chatter.data.network.ConfirmContainer
+import ru.endlesscode.chatter.data.network.DataContainer
+import ru.endlesscode.chatter.data.network.ErrorContainer
+import ru.endlesscode.chatter.data.network.MessageContainer
+import ru.endlesscode.chatter.data.network.NoticeContainer
 import java.lang.reflect.Type
 
 class DataContainerDeserializer : JsonDeserializer<DataContainer> {

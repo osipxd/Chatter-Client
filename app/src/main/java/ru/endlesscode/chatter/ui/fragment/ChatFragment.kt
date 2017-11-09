@@ -1,7 +1,7 @@
 /*
  * This file is part of Chatter, licensed under the MIT License (MIT).
  *
- * Copyright (c) Osip Fatkullin <osip.fatkullin@gmail.com>
+ * Copyright (c) osipxd <osip.fatkullin@gmail.com>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,6 +31,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
@@ -55,7 +56,7 @@ class ChatFragment : MvpAppCompatFragment(), ChatView {
     lateinit var adapter: Lazy<ChatAdapter>
 
     private lateinit var messagesContainer: RecyclerView
-    private val message by lazy { messageEdit }
+    private val message: EditText by lazy { messageEdit }
 
     @ProvidePresenter
     fun providePresenter(): ChatPresenter = presenter
