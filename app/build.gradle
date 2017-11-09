@@ -64,7 +64,8 @@ ext {
     daggerVersion = '2.12'
 
     // Async
-    coroutinesVersion = '0.19.3'
+    coroutinesVersion = '0.19.+'
+    rxVersion = '2.1.+'
 
     // JSON
     gsonVersion = '2.8.2'
@@ -96,6 +97,8 @@ dependencies {
 
     // Async
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion"
+    implementation "io.reactivex.rxjava2:rxjava:$rxVersion"
 
     // Testing
     testImplementation junit5()
