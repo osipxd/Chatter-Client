@@ -58,7 +58,7 @@ class UdpConnection(
 
     companion object {
         private const val TAG = "UdpConnection"
-        private const val TIMEOUT: Long = 1000
+        private const val TIMEOUT: Long = 500
 
         private fun allocateBuffer(): ByteBuffer = ByteBuffer.allocate(1024)
     }
@@ -82,7 +82,7 @@ class UdpConnection(
         }
     }
 
-    private suspend fun ProducerScope<DataContainer>.listenChannel(buffer: ByteBuffer) {
+    private fun ProducerScope<DataContainer>.listenChannel(buffer: ByteBuffer) {
         buffer.clear()
 
         val address = udpChannel.receive(buffer)
