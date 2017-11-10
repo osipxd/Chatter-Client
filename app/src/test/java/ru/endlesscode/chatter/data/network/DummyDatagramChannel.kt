@@ -58,7 +58,7 @@ class DummyDatagramChannel : DatagramChannel(mock()) {
     override fun write(buffer: ByteBuffer): Int {
         runBlocking { delay(sendTime) }
         dataSent(DI.converter.bytesToData(buffer.array()))
-        return 0
+        return buffer.array().size
     }
 
     fun dataSent(data: DataContainer) {
@@ -103,8 +103,8 @@ class DummyDatagramChannel : DatagramChannel(mock()) {
         TODO("mock")
     }
 
-    override fun implConfigureBlocking(p0: Boolean) {
-        TODO("mock")
+    override fun implConfigureBlocking(blocking: Boolean) {
+        // Nothing
     }
 
     override fun getLocalAddress(): SocketAddress {
@@ -130,29 +130,18 @@ class DummyDatagramChannel : DatagramChannel(mock()) {
         TODO("mock")
     }
 
-    override fun receive(buffer: ByteBuffer): SocketAddress {
-        var currentWaitTime: Long = 0
+    override fun receive(buffer: ByteBuffer): SocketAddress? {
+        val container = dataContainer
 
-        runBlocking {
-            var container = dataContainer
-            while (isActive) {
-                delay(deltaTime)
-                currentWaitTime += deltaTime
+        if (container != null) {
+            val data = DI.converter.dataToBytes(container)
+            val currData = buffer.array()
+            data.forEachIndexed { index, byte -> currData[index] = byte }
 
-                if (container == null) {
-                    container = dataContainer
-                }
-
-                if (currentWaitTime >= responseTime && container != null) {
-                    val data = DI.converter.dataToBytes(container)
-                    val currData = buffer.array()
-                    data.forEachIndexed { index, byte -> currData[index] = byte }
-                    break
-                }
-            }
+            return remoteAddress
         }
 
-        return remoteAddress
+        return null
     }
 
     override fun send(p0: ByteBuffer?, p1: SocketAddress?): Int {

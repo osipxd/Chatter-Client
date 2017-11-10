@@ -25,7 +25,6 @@
 
 package ru.endlesscode.chatter.data.network
 
-import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.experimental.runBlocking
@@ -39,19 +38,17 @@ import kotlin.test.assertEquals
 
 
 class UdpConnectionSpec : Spek({
-    val channel = spy(DummyDatagramChannel())
-    val connection = UdpConnection(
-            serverAddress = "localhost",
-            serverPort = 4242,
-            converter = DI.converter,
-            udpChannel = channel
-    )
+    val channel by memoized { spy(DummyDatagramChannel()) }
+    val connection by memoized {
+        UdpConnection(
+                serverAddress = "localhost",
+                serverPort = 4242,
+                converter = DI.converter,
+                udpChannel = channel
+        )
+    }
 
     given("a UdpConnection") {
-        beforeEachTest {
-            clearInvocations(channel)
-        }
-
         it("should successfully send data") {
             val data = AliveContainer(AliveData(UUID.randomUUID()))
             runBlocking {
@@ -61,14 +58,20 @@ class UdpConnectionSpec : Spek({
         }
 
         it("should successfully receive data") {
-            val data: DataContainer = AliveContainer(AliveData(UUID.randomUUID()))
-            var receivedData: DataContainer? = null
-
-            channel.sendDataFromServer(data)
             runBlocking {
-                receivedData = connection.dataChannel.receive()
+                val data: DataContainer = AliveContainer(AliveData(UUID.randomUUID()))
+
+                channel.sendDataFromServer(data)
+
+                val receivedData: DataContainer = connection.dataChannel.receive()
+                assertEquals(data, receivedData)
+                connection.stop()
             }
-            assertEquals(data, receivedData)
+        }
+
+        afterEachTest {
+            runBlocking {
+            }
         }
     }
 })

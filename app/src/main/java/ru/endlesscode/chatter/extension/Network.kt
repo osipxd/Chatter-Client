@@ -23,17 +23,14 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.chatter.data.network
+package ru.endlesscode.chatter.extension
 
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.channels.ProducerJob
+import java.nio.ByteBuffer
+import java.nio.channels.DatagramChannel
 
-interface ServerConnection {
-
-    val serverAddress: String
-    val serverPort: Int
-    val dataChannel: ProducerJob<DataContainer>
-
-    fun offerData(data: DataContainer): Job
-    suspend fun stop()
+suspend fun DatagramChannel.sendNonBlocking(buffer: ByteBuffer) {
+    var sentBytes = 0
+    while (sentBytes == 0) {
+        sentBytes = write(buffer)
+    }
 }

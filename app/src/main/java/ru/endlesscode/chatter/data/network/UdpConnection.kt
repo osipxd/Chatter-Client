@@ -31,10 +31,11 @@ import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.channels.ProducerJob
 import kotlinx.coroutines.experimental.channels.ProducerScope
 import kotlinx.coroutines.experimental.channels.produce
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withTimeout
 import ru.endlesscode.chatter.data.json.DataBytesConverter
 import ru.endlesscode.chatter.data.json.bytesToData
+import ru.endlesscode.chatter.extension.sendNonBlocking
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -51,7 +52,6 @@ class UdpConnection(
         get() = InetSocketAddress(InetAddress.getByName(serverAddress), serverPort)
 
     private var sendJob: Job? = null
-    private var receiveJob: Job? = null
 
     companion object {
         private const val TAG = "UdpConnection"
@@ -60,30 +60,29 @@ class UdpConnection(
         private fun allocateBuffer(): ByteBuffer = ByteBuffer.allocate(1024)
     }
 
+    init {
+        udpChannel.configureBlocking(false)
+    }
+
     override val dataChannel by lazy { newDataChannel() }
 
     private fun newDataChannel(): ProducerJob<DataContainer> = produce {
-        try {
-            listenChannelWhileActive()
-        } finally {
-            stop()
-        }
-    }
-
-    private suspend fun ProducerScope<DataContainer>.listenChannelWhileActive() {
         log("Starting data listener...")
         checkConnection()
 
         log("Data listener successfully started!")
-        val buffer = Companion.allocateBuffer()
-        while (isActive) listenChannel(buffer)
+        val buffer = allocateBuffer()
+        while (isActive && !isClosedForSend) {
+            listenChannel(buffer)
+            delay(TIMEOUT)
+        }
     }
 
     private suspend fun ProducerScope<DataContainer>.listenChannel(buffer: ByteBuffer) {
         buffer.clear()
 
-        withTimeout(TIMEOUT) {
-            udpChannel.receive(buffer)
+        val address = udpChannel.receive(buffer)
+        if (address != null) {
             val container: DataContainer = converter.bytesToData(buffer.array())
             offer(container)
             log("Data received: $container")
@@ -106,7 +105,7 @@ class UdpConnection(
         buffer.flip()
 
         try {
-            udpChannel.write(buffer)
+            udpChannel.sendNonBlocking(buffer)
             log("Data sent: $data")
         } catch (e: Exception) {
             println(e.printStackTrace())
@@ -120,9 +119,9 @@ class UdpConnection(
         log("Connected to: $remoteAddress")
     }
 
-    private suspend fun stop() {
+    override suspend fun stop() {
         log("Stopping channel listener...")
-        receiveJob?.cancelAndJoin()
+        dataChannel.cancelAndJoin()
         log("Channel listener stopped.")
 
         log("Awaiting end of data sending...")
