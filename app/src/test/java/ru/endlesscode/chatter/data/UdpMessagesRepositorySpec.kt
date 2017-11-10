@@ -40,7 +40,6 @@ import org.jetbrains.spek.api.dsl.xit
 import ru.endlesscode.chatter.data.messages.MessageIn
 import ru.endlesscode.chatter.data.messages.NetworkMessagesRepository
 import ru.endlesscode.chatter.data.network.DummyDatagramChannel
-import ru.endlesscode.chatter.data.network.DummyDatagramSocket
 import ru.endlesscode.chatter.data.network.MessageContainer
 import ru.endlesscode.chatter.data.network.UdpConnection
 import ru.endlesscode.chatter.di.DI
@@ -50,13 +49,12 @@ import kotlin.test.assertEquals
 
 
 class UdpMessagesRepositorySpec : Spek({
-    val socket = spy(DummyDatagramSocket())
-    val channel = spy(DummyDatagramChannel(socket))
+    val channel = spy(DummyDatagramChannel())
     val connection = spy(UdpConnection(
             serverAddress = "localhost",
             serverPort = 4242,
-            channel = channel,
-            converter = DI.converter
+            converter = DI.converter,
+            udpChannel = channel
     ))
     val repository = NetworkMessagesRepository(connection)
 
@@ -72,16 +70,16 @@ class UdpMessagesRepositorySpec : Spek({
         it("should send if queue is empty") {
             val message = MessageIn("client", "message for server", 1322018752992L)
             repository.sendMessage(message)
-            verify(connection).sendDataAsync(any())
+            verify(connection).offerData(any())
         }
 
         it("should send after sending all messages in queue") {
             val message = MessageIn("client", "another message for server", 1322018752992L)
             repository.sendMessage(message)
-            verify(connection, times(0)).sendDataAsync(any())
+            verify(connection, times(0)).offerData(any())
             runBlocking { delay((channel.sendTime * 1.2).toLong()) }
 
-            verify(connection).sendDataAsync(any())
+            verify(connection).offerData(any())
         }
     }
 
@@ -92,8 +90,8 @@ class UdpMessagesRepositorySpec : Spek({
         xit("should receive message") {
             val message = MessageIn("server", "message from server", 1322018752992L)
             val messageData = MessageInData(message.from, message.text)
-            socket.sendDataFromServer(MessageContainer(messageData))
-            runBlocking { delay((socket.responseTime * 1.5).toLong()) }
+            channel.sendDataFromServer(MessageContainer(messageData))
+            runBlocking { delay((channel.responseTime * 1.5).toLong()) }
             assertEquals(message, receivedMessage)
         }
     }

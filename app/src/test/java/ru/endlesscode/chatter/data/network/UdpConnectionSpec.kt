@@ -28,7 +28,6 @@ package ru.endlesscode.chatter.data.network
 import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.verify
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
@@ -40,22 +39,16 @@ import kotlin.test.assertEquals
 
 
 class UdpConnectionSpec : Spek({
-    val socket = spy(DummyDatagramSocket())
-    val channel = spy(DummyDatagramChannel(socket))
+    val channel = spy(DummyDatagramChannel())
     val connection = UdpConnection(
             serverAddress = "localhost",
             serverPort = 4242,
-            channel = channel,
-            converter = DI.converter
+            converter = DI.converter,
+            udpChannel = channel
     )
 
     given("a UdpConnection") {
-        beforeGroup {
-            connection.start()
-        }
-
         beforeEachTest {
-            clearInvocations(socket)
             clearInvocations(channel)
         }
 
@@ -70,17 +63,12 @@ class UdpConnectionSpec : Spek({
         it("should successfully receive data") {
             val data: DataContainer = AliveContainer(AliveData(UUID.randomUUID()))
             var receivedData: DataContainer? = null
-            connection.handleData = { receivedData = it }
 
-            socket.sendDataFromServer(data)
-            runBlocking { delay((socket.responseTime * 1.5).toLong()) }
-            assertEquals(data, receivedData)
-        }
-
-        afterGroup {
+            channel.sendDataFromServer(data)
             runBlocking {
-                connection.stop()
+                receivedData = connection.dataChannel.receive()
             }
+            assertEquals(data, receivedData)
         }
     }
 })

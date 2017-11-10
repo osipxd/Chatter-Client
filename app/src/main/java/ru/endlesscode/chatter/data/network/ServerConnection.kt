@@ -26,14 +26,13 @@
 package ru.endlesscode.chatter.data.network
 
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.channels.ProducerJob
 
 interface ServerConnection {
 
     val serverAddress: String
     val serverPort: Int
-    var handleData: (DataContainer) -> Unit
+    val dataChannel: ProducerJob<DataContainer>
 
-    fun start()
-    fun sendDataAsync(data: DataContainer): Job
-    suspend fun stop()
+    fun offerData(data: DataContainer): Job
 }

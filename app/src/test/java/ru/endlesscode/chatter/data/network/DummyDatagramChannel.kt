@@ -39,10 +39,19 @@ import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 import java.nio.channels.MembershipKey
 
-class DummyDatagramChannel(private val socket: DummyDatagramSocket) : DatagramChannel(mock()) {
+class DummyDatagramChannel : DatagramChannel(mock()) {
 
     val sendTime: Long = 300
+    val responseTime: Long = 500
+    var deltaTime: Long = 100
     var connected = false
+
+    private var dataContainer: DataContainer? = null
+        get() {
+            val valToReturn = field
+            field = null
+            return valToReturn
+        }
 
     private lateinit var remoteAddress: SocketAddress
 
@@ -75,7 +84,7 @@ class DummyDatagramChannel(private val socket: DummyDatagramSocket) : DatagramCh
     }
 
     override fun socket(): DatagramSocket {
-        return socket
+        TODO("mock")
     }
 
     override fun read(p0: ByteBuffer?): Int {
@@ -121,8 +130,29 @@ class DummyDatagramChannel(private val socket: DummyDatagramSocket) : DatagramCh
         TODO("mock")
     }
 
-    override fun receive(p0: ByteBuffer?): SocketAddress {
-        TODO("mock")
+    override fun receive(buffer: ByteBuffer): SocketAddress {
+        var currentWaitTime: Long = 0
+
+        runBlocking {
+            var container = dataContainer
+            while (isActive) {
+                delay(deltaTime)
+                currentWaitTime += deltaTime
+
+                if (container == null) {
+                    container = dataContainer
+                }
+
+                if (currentWaitTime >= responseTime && container != null) {
+                    val data = DI.converter.dataToBytes(container)
+                    val currData = buffer.array()
+                    data.forEachIndexed { index, byte -> currData[index] = byte }
+                    break
+                }
+            }
+        }
+
+        return remoteAddress
     }
 
     override fun send(p0: ByteBuffer?, p1: SocketAddress?): Int {
@@ -131,5 +161,9 @@ class DummyDatagramChannel(private val socket: DummyDatagramSocket) : DatagramCh
 
     override fun getRemoteAddress(): SocketAddress {
         return remoteAddress
+    }
+
+    fun sendDataFromServer(data: DataContainer) {
+        this.dataContainer = data
     }
 }

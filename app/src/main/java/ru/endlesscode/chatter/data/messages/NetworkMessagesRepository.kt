@@ -44,11 +44,6 @@ class NetworkMessagesRepository(
 
     private var handleMessage: (Message) -> Unit = { }
 
-    init {
-        connection.start()
-        connection.handleData = this::handleContainer
-    }
-
     override fun sendMessage(message: Message) {
         if (isQueueFree) {
             messagesQueue.add(message)
@@ -62,7 +57,7 @@ class NetworkMessagesRepository(
         val message = this.messagesQueue.first()
         // TODO: Send real UUID
         val data = MessageOutData(UUID.randomUUID(), message.text)
-        connection.sendDataAsync(MessageContainer(data))
+        connection.offerData(MessageContainer(data))
                 .invokeOnCompletion { onMessageSent() }
     }
 
@@ -88,6 +83,6 @@ class NetworkMessagesRepository(
     }
 
     override suspend fun finish() {
-        connection.stop()
+        connection.dataChannel.cancel()
     }
 }

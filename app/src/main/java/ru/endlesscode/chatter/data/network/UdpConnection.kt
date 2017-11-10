@@ -27,11 +27,14 @@ package ru.endlesscode.chatter.data.network
 
 import android.support.annotation.VisibleForTesting
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.cancelAndJoin
+import kotlinx.coroutines.experimental.channels.ProducerJob
+import kotlinx.coroutines.experimental.channels.ProducerScope
+import kotlinx.coroutines.experimental.channels.produce
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withTimeout
 import ru.endlesscode.chatter.data.json.DataBytesConverter
 import ru.endlesscode.chatter.data.json.bytesToData
-import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -41,10 +44,8 @@ class UdpConnection(
         override val serverAddress: String,
         override val serverPort: Int,
         private val converter: DataBytesConverter,
-        private val channel: DatagramChannel = DatagramChannel.open()
+        private val udpChannel: DatagramChannel = DatagramChannel.open()
 ) : ServerConnection {
-
-    override var handleData: (DataContainer) -> Unit = { }
 
     private val remoteAddress: InetSocketAddress
         get() = InetSocketAddress(InetAddress.getByName(serverAddress), serverPort)
@@ -54,61 +55,42 @@ class UdpConnection(
 
     companion object {
         private const val TAG = "UdpConnection"
-        private const val TIMEOUT = 2 * 1000
+        private const val TIMEOUT: Long = 1000
+
+        private fun allocateBuffer(): ByteBuffer = ByteBuffer.allocate(1024)
     }
 
-    override fun start() {
-        if (channel.isConnected) return
+    override val dataChannel by lazy { newDataChannel() }
 
-        launch {
-            try {
-                channel.connect(remoteAddress)
-                channel.socket().soTimeout = TIMEOUT
-                log("Connected to: $remoteAddress")
-
-                startChannelListening()
-            } catch (e: Exception) {
-                stop()
-            }
-        }
-    }
-
-    private fun startChannelListening() {
-        receiveJob = launch {
-            log("Starting data listener...")
-            if (receiveJob?.waitConnection() == false) {
-                return@launch
-            }
-
-            log("Data listener successfully started!")
-            val buffer = allocateBuffer()
-            while (listenChannel(buffer)) {
-                // Listen channel while returns true
-            }
-        }
-    }
-
-    private fun listenChannel(buffer: ByteBuffer): Boolean {
-        buffer.clear()
-        val packet = DatagramPacket(buffer.array(), buffer.array().size)
-
+    private fun newDataChannel(): ProducerJob<DataContainer> = produce {
         try {
-            channel.socket().receive(packet)
-            val container: DataContainer = converter.bytesToData(packet.data)
-            handleData(container)
-            log("Data received: $container")
-        } catch (e: Exception) {
-            val job = receiveJob
-            if (job!!.isCancelled) {
-                log("Listening was cancelled.")
-                return false
-            }
+            listenChannelWhileActive()
+        } finally {
+            stop()
         }
-
-        return true
     }
 
-    override fun sendDataAsync(data: DataContainer): Job {
+    private suspend fun ProducerScope<DataContainer>.listenChannelWhileActive() {
+        log("Starting data listener...")
+        checkConnection()
+
+        log("Data listener successfully started!")
+        val buffer = Companion.allocateBuffer()
+        while (isActive) listenChannel(buffer)
+    }
+
+    private suspend fun ProducerScope<DataContainer>.listenChannel(buffer: ByteBuffer) {
+        buffer.clear()
+
+        withTimeout(TIMEOUT) {
+            udpChannel.receive(buffer)
+            val container: DataContainer = converter.bytesToData(buffer.array())
+            offer(container)
+            log("Data received: $container")
+        }
+    }
+
+    override fun offerData(data: DataContainer): Job {
         val job = launch { sendData(data) }
         sendJob = job
 
@@ -117,46 +99,37 @@ class UdpConnection(
 
     @VisibleForTesting
     internal suspend fun sendData(data: DataContainer) {
-        if (sendJob?.waitConnection() == false) {
-            return
-        }
+        checkConnection()
 
-        val buffer = allocateBuffer()
+        val buffer = Companion.allocateBuffer()
         buffer.put(converter.dataToBytes(data))
         buffer.flip()
 
         try {
-            channel.write(buffer)
+            udpChannel.write(buffer)
             log("Data sent: $data")
         } catch (e: Exception) {
             println(e.printStackTrace())
         }
     }
 
-    private fun allocateBuffer(): ByteBuffer = ByteBuffer.allocate(1024)
+    private fun checkConnection() {
+        if (udpChannel.isConnected) return
 
-    private suspend fun Job.waitConnection(): Boolean {
-        while (!channel.isConnected) {
-            delay(TIMEOUT.toLong())
-            if (this.isCancelled) {
-                log("Job was cancelled.")
-                return false
-            }
-        }
-
-        return true
+        udpChannel.connect(remoteAddress)
+        log("Connected to: $remoteAddress")
     }
 
-    suspend override fun stop() {
+    private suspend fun stop() {
         log("Stopping channel listener...")
-        receiveJob?.cancel()
-        receiveJob?.join()
+        receiveJob?.cancelAndJoin()
         log("Channel listener stopped.")
+
         log("Awaiting end of data sending...")
         sendJob?.join()
         log("All data sent.")
 
-        channel.close()
+        udpChannel.close()
         log("Connection closed.")
     }
 
