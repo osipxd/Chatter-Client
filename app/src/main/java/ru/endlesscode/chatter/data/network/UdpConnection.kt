@@ -48,6 +48,9 @@ class UdpConnection(
         private val udpChannel: DatagramChannel = DatagramChannel.open()
 ) : ServerConnection {
 
+    override val dataChannel by lazy { newDataChannel() }
+
+    private var channelCreated = false
     private val remoteAddress: InetSocketAddress
         get() = InetSocketAddress(InetAddress.getByName(serverAddress), serverPort)
 
@@ -64,9 +67,10 @@ class UdpConnection(
         udpChannel.configureBlocking(false)
     }
 
-    override val dataChannel by lazy { newDataChannel() }
 
     private fun newDataChannel(): ProducerJob<DataContainer> = produce(capacity = 5) {
+        channelCreated = true
+
         log("Starting data listener...")
         checkConnection()
 
@@ -120,9 +124,11 @@ class UdpConnection(
     }
 
     override suspend fun stop() {
-        log("Stopping channel listener...")
-        dataChannel.cancelAndJoin()
-        log("Channel listener stopped.")
+        if (channelCreated) {
+            log("Stopping channel listener...")
+            dataChannel.cancelAndJoin()
+            log("Channel listener stopped.")
+        }
 
         log("Awaiting end of data sending...")
         sendJob?.join()
