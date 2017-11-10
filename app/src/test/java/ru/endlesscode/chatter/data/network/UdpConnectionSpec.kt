@@ -63,14 +63,14 @@ class UdpConnectionSpec : Spek({
 
                 channel.sendDataFromServer(data)
 
-                val receivedData: DataContainer = connection.dataChannel.receive()
+                val receivedData: DataContainer? = connection.dataChannel.receiveOrNull()
                 assertEquals(data, receivedData)
-                connection.stop()
             }
         }
 
         afterEachTest {
             runBlocking {
+                connection.stop()
             }
         }
     }

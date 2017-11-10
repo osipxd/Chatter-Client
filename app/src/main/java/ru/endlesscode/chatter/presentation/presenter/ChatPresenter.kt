@@ -65,7 +65,7 @@ class ChatPresenter @Inject constructor(
 
         val message = MessageOut(text)
         messages.add(message)
-        interactor.sendMessage(message, this::onError)
+        interactor.sendMessage(message)
     }
 
     private fun onError(errorMessage: String) {

@@ -26,8 +26,6 @@
 package ru.endlesscode.chatter.data.network
 
 import com.nhaarman.mockito_kotlin.mock
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
 import ru.endlesscode.chatter.data.json.bytesToData
 import ru.endlesscode.chatter.di.DI
 import java.net.DatagramSocket
@@ -41,9 +39,6 @@ import java.nio.channels.MembershipKey
 
 class DummyDatagramChannel : DatagramChannel(mock()) {
 
-    val sendTime: Long = 300
-    val responseTime: Long = 500
-    var deltaTime: Long = 100
     var connected = false
 
     private var dataContainer: DataContainer? = null
@@ -56,7 +51,6 @@ class DummyDatagramChannel : DatagramChannel(mock()) {
     private lateinit var remoteAddress: SocketAddress
 
     override fun write(buffer: ByteBuffer): Int {
-        runBlocking { delay(sendTime) }
         dataSent(DI.converter.bytesToData(buffer.array()))
         return buffer.array().size
     }

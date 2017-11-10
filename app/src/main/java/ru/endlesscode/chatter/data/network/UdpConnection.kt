@@ -66,7 +66,7 @@ class UdpConnection(
 
     override val dataChannel by lazy { newDataChannel() }
 
-    private fun newDataChannel(): ProducerJob<DataContainer> = produce {
+    private fun newDataChannel(): ProducerJob<DataContainer> = produce(capacity = 5) {
         log("Starting data listener...")
         checkConnection()
 

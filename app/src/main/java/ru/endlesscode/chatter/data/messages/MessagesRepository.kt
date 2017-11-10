@@ -25,10 +25,13 @@
 
 package ru.endlesscode.chatter.data.messages
 
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.channels.Channel
 import ru.endlesscode.chatter.entity.local.Message
 
 interface MessagesRepository {
-    fun sendMessage(message: Message)
-    fun setMessageListener(listener: (Message) -> Unit)
+    val messageChannel: Channel<Message>
+
+    fun offerMessage(message: Message): Job
     suspend fun finish()
 }

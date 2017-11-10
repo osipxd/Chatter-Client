@@ -25,6 +25,12 @@
 
 package ru.endlesscode.chatter.data.messages
 
+import kotlinx.coroutines.experimental.CoroutineStart
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.experimental.channels.Channel.Factory.CONFLATED
+import kotlinx.coroutines.experimental.channels.consumeEach
+import kotlinx.coroutines.experimental.launch
 import ru.endlesscode.chatter.data.network.DataContainer
 import ru.endlesscode.chatter.data.network.MessageContainer
 import ru.endlesscode.chatter.data.network.ServerConnection
@@ -38,51 +44,65 @@ class NetworkMessagesRepository(
         private val connection: ServerConnection
 ) : MessagesRepository {
 
-    private val messagesQueue = mutableListOf<Message>()
+    override val messageChannel = Channel<Message>(CONFLATED)
+
+    private val jobQueue = mutableListOf<Job>()
     private val isQueueFree: Boolean
-        get() = messagesQueue.isEmpty()
+        get() = jobQueue.isEmpty()
 
-    private var handleMessage: (Message) -> Unit = { }
-
-    override fun sendMessage(message: Message) {
-        if (isQueueFree) {
-            messagesQueue.add(message)
-            sendNextMessage()
-        } else {
-            messagesQueue.add(message)
+    init {
+        launch {
+            connection.dataChannel.consumeEach {
+                handleContainer(it)
+            }
         }
     }
 
+    override fun offerMessage(message: Message): Job {
+        val job = launch(start = CoroutineStart.LAZY) {
+            sendMessage(message)
+        }
+
+        if (isQueueFree) {
+            jobQueue.add(job)
+            sendNextMessage()
+        } else {
+            jobQueue.add(job)
+        }
+
+        return job
+    }
+
     private fun sendNextMessage() {
-        val message = this.messagesQueue.first()
+        jobQueue.first().start()
+    }
+
+    private suspend fun sendMessage(message: Message) {
         // TODO: Send real UUID
         val data = MessageOutData(UUID.randomUUID(), message.text)
-        connection.offerData(MessageContainer(data))
-                .invokeOnCompletion { onMessageSent() }
+        connection.offerData(MessageContainer(data)).join()
+        onMessageSent()
     }
 
     private fun onMessageSent() {
-        messagesQueue.removeAt(0)
+        jobQueue.removeAt(0)
         if (!isQueueFree) sendNextMessage()
-    }
-
-    override fun setMessageListener(listener: (Message) -> Unit) {
-        this.handleMessage = listener
     }
 
     private fun handleContainer(container: DataContainer) {
         when (container) {
-            is MessageContainer -> handleMessage(container)
+            is MessageContainer -> handleMessageContainer(container)
         }
     }
 
-    private fun handleMessage(container: MessageContainer) {
+    private fun handleMessageContainer(container: MessageContainer) {
         val data = container.data as MessageInData
         val message = MessageIn(data.from, data.text, container.time)
-        handleMessage(message)
+        messageChannel.offer(message)
     }
 
     override suspend fun finish() {
-        connection.dataChannel.cancel()
+        messageChannel.close()
+        connection.stop()
     }
 }

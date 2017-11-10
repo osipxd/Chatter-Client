@@ -25,10 +25,14 @@
 
 package ru.endlesscode.chatter.model.messages
 
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.channels.Channel
+import ru.endlesscode.chatter.data.messages.MessageIn
+import ru.endlesscode.chatter.data.messages.MessageOut
 import ru.endlesscode.chatter.entity.local.Message
 
 interface MessagesInteractor {
-    fun sendMessage(message: Message, onError: (String) -> Unit)
-    fun setMessageListener(listener: (Message) -> Unit)
-    fun finish(onFinished: () -> Unit)
+    fun sendMessage(message: MessageOut): Channel<Message>
+    fun setMessageListener(listener: (MessageIn) -> Unit)
+    fun finish(): Job
 }

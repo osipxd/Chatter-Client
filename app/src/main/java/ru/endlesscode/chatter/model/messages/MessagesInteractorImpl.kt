@@ -25,32 +25,40 @@
 
 package ru.endlesscode.chatter.model.messages
 
-import android.content.Context
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.cancelChildren
+import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.launch
-import ru.endlesscode.chatter.R
+import ru.endlesscode.chatter.data.messages.MessageIn
+import ru.endlesscode.chatter.data.messages.MessageOut
 import ru.endlesscode.chatter.data.messages.MessagesRepository
 import ru.endlesscode.chatter.entity.local.Message
 
 class MessagesInteractorImpl(
-        private val context: Context,
         private val repository: MessagesRepository
 ) : MessagesInteractor {
 
-    override fun sendMessage(message: Message, onError: (String) -> Unit) {
-        if (message.text.isNotEmpty()) {
-            repository.sendMessage(message)
-        } else {
-            onError(context.getString(R.string.error_message_empty))
-        }
-    }
+    override fun sendMessage(message: MessageOut): Channel<Message> {
+        val channel = Channel<Message>()
 
-    override fun setMessageListener(listener: (Message) -> Unit) {
-        repository.setMessageListener(listener)
-    }
-
-    override fun finish(onFinished: () -> Unit) {
         launch {
-            repository.finish()
-        }.invokeOnCompletion { onFinished() }
+            if (message.text.isEmpty()) {
+                channel.close(IllegalArgumentException("Message shouldn't be empty!"))
+                return@launch
+            }
+
+            channel.offer(message)
+        }
+
+        return channel
+    }
+
+    override fun setMessageListener(listener: (MessageIn) -> Unit) {
+        //        repository.setMessageListener(listener)
+    }
+
+    override fun finish(): Job = launch {
+        coroutineContext.cancelChildren()
+        repository.finish()
     }
 }

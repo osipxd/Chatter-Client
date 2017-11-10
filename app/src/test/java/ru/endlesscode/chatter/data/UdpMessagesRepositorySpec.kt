@@ -25,27 +25,21 @@
 
 package ru.endlesscode.chatter.data
 
-import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.spy
-import com.nhaarman.mockito_kotlin.times
-import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import org.jetbrains.spek.api.dsl.xit
 import ru.endlesscode.chatter.data.messages.MessageIn
 import ru.endlesscode.chatter.data.messages.NetworkMessagesRepository
 import ru.endlesscode.chatter.data.network.DummyDatagramChannel
-import ru.endlesscode.chatter.data.network.MessageContainer
 import ru.endlesscode.chatter.data.network.UdpConnection
 import ru.endlesscode.chatter.di.DI
-import ru.endlesscode.chatter.entity.local.Message
-import ru.endlesscode.chatter.entity.remote.MessageInData
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 class UdpMessagesRepositorySpec : Spek({
@@ -68,31 +62,23 @@ class UdpMessagesRepositorySpec : Spek({
         }
 
         it("should send if queue is empty") {
-            val message = MessageIn("client", "message for server", 1322018752992L)
-            repository.sendMessage(message)
-            verify(connection).offerData(any())
-        }
-
-        it("should send after sending all messages in queue") {
-            val message = MessageIn("client", "another message for server", 1322018752992L)
-            repository.sendMessage(message)
-            verify(connection, times(0)).offerData(any())
-            runBlocking { delay((channel.sendTime * 1.2).toLong()) }
-
-            verify(connection).offerData(any())
+            runBlocking {
+                val message = MessageIn("client", "message for server", 1322018752992L)
+                val job = repository.offerMessage(message)
+                delay(50)
+                assertTrue(job.isCompleted)
+            }
         }
     }
 
     on("receiving message") {
-        var receivedMessage: Message? = null
-        repository.setMessageListener { receivedMessage = it }
-
-        xit("should receive message") {
-            val message = MessageIn("server", "message from server", 1322018752992L)
-            val messageData = MessageInData(message.from, message.text)
-            channel.sendDataFromServer(MessageContainer(messageData))
-            runBlocking { delay((channel.responseTime * 1.5).toLong()) }
-            assertEquals(message, receivedMessage)
+        it("should receive message") {
+            runBlocking {
+                val message = MessageIn("server", "message from server", 1322018752992L)
+                repository.messageChannel.offer(message)
+                val receivedMessage = repository.messageChannel.receive()
+                assertEquals(message, receivedMessage)
+            }
         }
     }
 

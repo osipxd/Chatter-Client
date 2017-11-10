@@ -25,7 +25,6 @@
 
 package ru.endlesscode.chatter.di.module
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import ru.endlesscode.chatter.data.messages.MessagesRepository
@@ -41,8 +40,8 @@ class MessagesModule {
 
     @Provides
     @Singleton
-    fun provideMessagesInteractor(context: Context, repository: MessagesRepository): MessagesInteractor =
-            MessagesInteractorImpl(context, repository)
+    fun provideMessagesInteractor(repository: MessagesRepository): MessagesInteractor =
+            MessagesInteractorImpl(repository)
 
     @Provides
     @Singleton
